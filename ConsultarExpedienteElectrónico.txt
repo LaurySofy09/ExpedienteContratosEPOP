@@ -1,0 +1,2197 @@
+<%@ Page Title="" Language="vb" AutoEventWireup="false" MasterPageFile="~/EPOP_tc.Master" CodeBehind="WFExpedienteElectronicoProyecto.aspx.vb" Inherits="CGR.EPOP.UI.WFExpedienteElectronicoProyecto" %>
+
+<%@ Register Src="~/UserControl/ucHistorialElectronico.ascx" TagPrefix="uc2" TagName="ucHistorialElectronico" %>
+<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
+    <asp:TextBox ID="TxtIdContrato" runat="server" CssClass="Oculto"></asp:TextBox>
+    <asp:TextBox ID="txtActoPubEmpAdj" runat="server" CssClass="Oculto"></asp:TextBox>
+    <asp:TextBox ID="txtValorOrdena" runat="server" CssClass="Oculto"></asp:TextBox>
+    <asp:TextBox ID="txtSortDir" runat="server" CssClass="Oculto"></asp:TextBox>
+    <asp:TextBox ID="txtSortDirOpt" runat="server" CssClass="Oculto"></asp:TextBox>
+    <asp:TextBox ID="txtSortDirOptAnt" runat="server" CssClass="Oculto"></asp:TextBox>
+    <asp:TextBox ID="txtCargaEditaReg" runat="server" CssClass="Oculto"></asp:TextBox>
+    <asp:TextBox ID="txtIdEmpresa" runat="server" CssClass="Oculto"></asp:TextBox>
+    <asp:TextBox ID="txtIdRenglon" runat="server" CssClass="Oculto"></asp:TextBox>
+    <asp:TextBox ID="txtIdFianza" runat="server" CssClass="Oculto"></asp:TextBox>
+
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <div class="row-custom">
+                <h3 class="text-center"><strong>
+                    <asp:Label ID="lblNombreFormulario" runat="server" Style="text-align: center" Text="Consulta de Expediente Electrónico del Proyecto"></asp:Label></strong></h3>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="panel panel-default">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+
+            <ul id="Tabs" class="nav nav-tabs" role="tablist">
+                <li class="nav-item" id="navtapContrato" runat="server">
+                    <asp:LinkButton ID="tapContrato" runat="server"><i class='fa fa-group'></i> Contrato</asp:LinkButton>
+                </li>
+                <li class="nav-item" id="navtapDuracionCostI" runat="server">
+                    <asp:LinkButton ID="tapDuracionCostI" runat="server" Enabled="false"><i class='fa fa-clock-o' ></i> Duración y <br />Costo Inicial</asp:LinkButton>
+                </li>
+                <li class="nav-item" id="navtapEmpresaAdj" runat="server">
+                    <asp:LinkButton ID="tapEmpresaAdj" runat="server" Enabled="false"><i class='fa fa-building'></i> Empresa Adjudicada</asp:LinkButton>
+                </li>
+                <li class="nav-item" id="navtapFianzas" runat="server">
+                    <asp:LinkButton ID="tapFianzas" runat="server" Enabled="false"><i class='fa fa-certificate'></i> Fianzas</asp:LinkButton>
+                </li>
+                <li class="nav-item" id="navtapSaldosDesem" runat="server">
+                    <asp:LinkButton ID="tapSaldosDesem" runat="server" Enabled="false"><i class='fa fa-money'></i> Saldos y <br /> Desembolsos</asp:LinkButton>
+                </li>
+                <li class="nav-item" id="navtapEstatus" runat="server">
+                    <asp:LinkButton ID="tapEstatus" runat="server" Enabled="false"><i class='fa fa-tags'></i> Estatus</asp:LinkButton>
+                </li>
+                <li class="nav-item" id="navtapActas" runat="server">
+                    <asp:LinkButton ID="tapActas" runat="server" Enabled="false"><i class='fa fa-book'></i> Actas</asp:LinkButton>
+                </li>
+                <li class="nav-item" id="navtapVisitaEval" runat="server">
+                    <asp:LinkButton ID="tapVisitaEval" runat="server" Enabled="false"><i class='fa fa-briefcase'></i> Visita <br /> Evaluación</asp:LinkButton>
+                </li>
+                <li class="nav-item" id="navtapHisEle" runat="server">
+                    <asp:LinkButton ID="tapHisEle" runat="server" Enabled="false"><i class='fa fa-list'></i> Historial Electrónico</asp:LinkButton>
+                </li>
+            </ul>
+
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+            </div>
+            <%--Salto de liena--%>
+
+            <div class="tab-content">
+
+                <div class="row" id="dvNumConM" runat="server" visible="false">
+                    <div class="panel col-lg-12 fa-border">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="row form-inline">
+                                    <asp:Label ID="LblDatCon" class="col-lg-12 text-left" runat="server" Font-Bold="true" Text="Datos del Contrato"></asp:Label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                        </div>
+
+                        <div class="col-lg-12">
+                            <div class="row form-inline">
+                                <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                    <label class="col-lg-4">No. Contrato: </label>
+                                    <div class="col-lg-8">
+                                        <asp:TextBox ID="txtNumConM" CssClass="form-control" runat="server" autocomplete="off" ReadOnly="true"></asp:TextBox>
+                                    </div>
+                                </div>
+
+                                <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                    <label class="col-lg-4">Fecha Contrato: </label>
+                                    <div class="col-lg-8">
+                                        <asp:TextBox ID="txtFecConM" CssClass="form-control" runat="server" autocomplete="off" ReadOnly="true" data-date-format="dd/M/yyyy" data-date-language="es"></asp:TextBox>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                        </div>
+                        <%--Salto de linea--%>
+                    </div>
+                </div>
+            </div>
+            <%--Numero y Fecha del contrato--%>
+
+            <asp:MultiView ID="mvExpediente" runat="server">
+
+                <asp:View ID="vContrato" runat="server">
+                    <asp:MultiView ID="mvContrato" runat="server">
+                        <asp:View ID="vContLista" runat="server">
+                            <div class="panel col-lg-12 fa-border">
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="row form-inline">
+                                            <asp:Label ID="LblCamBus" class="col-lg-12 text-left" runat="server" Font-Bold="true" Text="Campos para la Búsqueda"></asp:Label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="row form-inline">
+                                            <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                                <label class="col-lg-4" runat="server" id="lblDdlArea">Área: </label>
+                                                <div class="col-lg-8">
+                                                    <asp:DropDownList ID="ddlArea" CssClass="form-control" runat="server" AppendDataBoundItems="true" AutoPostBack="true" ToolTip="Filtrar Acto Publico registrados en EPOP por área">
+                                                        <asp:ListItem Value="-1" Text="--Seleccione--"></asp:ListItem>
+                                                    </asp:DropDownList>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                                <label class="col-lg-4" runat="server" id="lblDdlEntidad">Entidad: </label>
+                                                <div class="col-lg-8">
+                                                    <asp:DropDownList ID="ddlEntidad" CssClass="form-control" runat="server" AppendDataBoundItems="true" AutoPostBack="true" ToolTip="Filtrar Acto Publico registrados en EPOP por entidad">
+                                                        <%--<asp:ListItem Value="-1" Text="Seleccione"></asp:ListItem>--%>
+                                                    </asp:DropDownList>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <%--Area y Entidad--%>
+
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                                </div>
+                                <%--Salto de liena--%>
+
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="row form-inline">
+                                            <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                                <label class="col-lg-4">No.Contrato: </label>
+                                                <div class="col-lg-8">
+                                                    <asp:TextBox ID="txtNumCon" CssClass="form-control" runat="server" autocomplete="off"></asp:TextBox>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                                <label class="col-lg-4">Estado: </label>
+                                                <div class="col-lg-8">
+                                                    <asp:DropDownList ID="ddlEstado" CssClass="form-control" runat="server" AppendDataBoundItems="true">
+                                                        <asp:ListItem Value="A" Text="Activo"></asp:ListItem>
+                                                        <asp:ListItem Value="I" Text="Inactivo"></asp:ListItem>
+                                                    </asp:DropDownList>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                                </div>
+                                <%--Salto de liena--%>
+
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="row form-inline">
+                                            <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                                <label class="col-lg-4">Fecha Contrato Desde: </label>
+                                                <div class="col-lg-8">
+                                                    <asp:TextBox ID="txtFecConDes" CssClass="form-control" runat="server" autocomplete="off" data-provide="datepicker" data-date-format="dd/M/yyyy" data-date-language="es"></asp:TextBox>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                                <label class="col-lg-4">Hasta: </label>
+                                                <div class="col-lg-8">
+                                                    <asp:TextBox ID="txtFecConHas" CssClass="form-control" runat="server" autocomplete="off" data-provide="datepicker" data-date-format="dd/M/yyyy" data-date-language="es"></asp:TextBox>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <%--Fechad de contrato--%>
+
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                                </div>
+                                <%--Salto de liena--%>
+
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="row form-inline">
+                                            <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                                <label class="col-lg-4">Estado Electrónico del Proyecto: </label>
+                                                <div class="col-lg-8">
+                                                    <asp:DropDownList ID="ddlEstEle" CssClass="form-control" runat="server" AppendDataBoundItems="true" AutoPostBack="true" ToolTip="Filtrar Contratos por Estado Electrónico del Proyecto">
+                                                    </asp:DropDownList>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                                <label class="col-lg-4">Auditor: </label>
+                                                <div class="col-lg-8">
+                                                    <asp:DropDownList ID="ddlAuditor" CssClass="form-control" runat="server" AppendDataBoundItems="true" ToolTip="Filtrar Contratos por auiditor">
+                                                    </asp:DropDownList>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <%--Estado electronico y auditor--%>
+
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                                </div>
+                                <%--Salto de liena--%>
+
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="row form-inline">
+                                            <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                                <label class="col-lg-4">Estatus del Proyecto: </label>
+                                                <div class="col-lg-8">
+                                                    <asp:DropDownList ID="ddlEstatus" CssClass="form-control" runat="server" AppendDataBoundItems="true" ToolTip="Filtrar Contratos por Estatus del Proyecto">
+                                                    </asp:DropDownList>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                                <label class="col-lg-4"></label>
+                                                <div class="col-lg-8 text-right">
+                                                    <asp:HyperLink ID="hypPanCom" runat="server" NavigateUrl="https://www.panamacompra.gob.pa/Inicio/" Target="_blank" ToolTip="Acceder a la pagina de inicio de Panama Compra">Accede a Sistema PanamaCompra</asp:HyperLink>
+                                                    <div class="container" style="word-wrap: break-word">
+                                                        <asp:HyperLink ID="hypUrlActPub" CssClass="control-label" runat="server" Target="_blank" ToolTip="Acceder a la pagina del acto publico" Visible="false">Url Acto Público</asp:HyperLink>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <%--Acceso a panama compras--%>
+
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="row form-inline">
+                                            <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-8"></div>
+                                            <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-8">
+                                                <label class="col-lg-4"></label>
+                                                <div class="col-lg-8">
+                                                    <asp:Button ID="btnBuscar" class="btn btn-wd btn-primary" data-placement="left" runat="server" Text="Buscar" ToolTip="Buscar los datos en sistema EPOP" />
+                                                    <asp:Button ID="btnLimpiar" class="btn btn-wd btn-primary" data-placement="left" runat="server" Text="Limpiar" ToolTip="Limpiar campos de búsqueda y tabla de resultados" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <%--Botones Buscar y Limpiar--%>
+
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                                </div>
+                                <%--Salto de linea--%>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="row form-inline">
+                                        <asp:Label ID="LblGvContrato" runat="server" Text="Lista de Contratos" Font-Bold="true" Visible="false"></asp:Label>
+                                    </div>
+                                </div>
+                            </div>
+                            <%--Lista de contratos--%>
+
+                            <div class="row table-responsive">
+                                <asp:GridView ID="gvContrato" runat="server" CssClass="table table-condensed" AutoGenerateColumns="false" ShowFooter="true" AllowPaging="True" PageSize="10" ShowHeaderWhenEmpty="true" DataKeyNames="Id,IdContrato,Entidad,NumActoPub,NumContrato,FechaContrato,FechaRefrendo,Estatus,EstEle,Estado,UsuarioRegistra,SupervisorCrea,SupervisorFechaCrea,SupervisorModifica,SupervisorFechaModifica,FechaRegistro,UsuarioModifica,FechaModifica" Visible="false">
+                                    <Columns>
+                                        <asp:TemplateField HeaderText="Id" HeaderStyle-HorizontalAlign="Center">
+                                            <ItemTemplate>
+                                                <asp:Label ID="grvLblSec" runat="server" Text=''></asp:Label>
+                                            </ItemTemplate>
+                                        </asp:TemplateField>
+                                        <asp:TemplateField HeaderText="Entidad" HeaderStyle-HorizontalAlign="Center">
+                                            <ItemTemplate>
+                                                <asp:Label ID="grvLblEntidad" runat="server" Text=''></asp:Label>
+                                            </ItemTemplate>
+                                        </asp:TemplateField>
+                                        <asp:TemplateField HeaderText="No. Acto Público" HeaderStyle-HorizontalAlign="Center">
+                                            <ItemTemplate>
+                                                <asp:Label ID="grvLblNumActPub" runat="server" Text=''></asp:Label>
+                                            </ItemTemplate>
+                                        </asp:TemplateField>
+                                        <asp:TemplateField HeaderText="No. Contrato" HeaderStyle-HorizontalAlign="Center">
+                                            <ItemTemplate>
+                                                <asp:LinkButton ID="LnkBtnSelc" CssClass="text-center" CommandName="Select" CommandArgument='<%# Eval("IdContrato") %>' runat="server"><%# Eval("NumContrato")%></asp:LinkButton>
+                                            </ItemTemplate>
+                                        </asp:TemplateField>
+                                        <asp:TemplateField HeaderText="Fecha Contrato" HeaderStyle-HorizontalAlign="Center">
+                                            <ItemTemplate>
+                                                <asp:Label ID="grvLblFecCon" runat="server" Text=''></asp:Label>
+                                            </ItemTemplate>
+                                        </asp:TemplateField>
+                                        <asp:TemplateField HeaderText="Fecha Refrendo" HeaderStyle-HorizontalAlign="Center">
+                                            <ItemTemplate>
+                                                <asp:Label ID="grvLblFecRef" runat="server" Text=''></asp:Label>
+                                            </ItemTemplate>
+                                        </asp:TemplateField>
+                                        <asp:TemplateField HeaderText="Estado Electrónico" HeaderStyle-HorizontalAlign="Center">
+                                            <ItemTemplate>
+                                                <asp:Label ID="grvLblEstEle" runat="server" Text=''></asp:Label>
+                                            </ItemTemplate>
+                                        </asp:TemplateField>
+                                        <asp:TemplateField HeaderText="Estatus del Proyecto" HeaderStyle-HorizontalAlign="Center">
+                                            <ItemTemplate>
+                                                <asp:Label ID="grvLblEstPro" runat="server" Text=''></asp:Label>
+                                            </ItemTemplate>
+                                        </asp:TemplateField>
+                                        <asp:TemplateField HeaderText="Estado" HeaderStyle-HorizontalAlign="Center">
+                                            <ItemTemplate>
+                                                <asp:Label ID="grvLblEstado" runat="server" Text=''></asp:Label>
+                                            </ItemTemplate>
+                                        </asp:TemplateField>
+                                        <asp:TemplateField HeaderText="Auditor" HeaderStyle-HorizontalAlign="Center">
+                                            <ItemTemplate>
+                                                <asp:Label ID="grvLblAuditor" runat="server" Text=''></asp:Label>
+                                            </ItemTemplate>
+                                        </asp:TemplateField>
+                                        <asp:TemplateField HeaderText="Supervisor" HeaderStyle-HorizontalAlign="Center">
+                                            <ItemTemplate>
+                                                <asp:Label ID="grvLblSupervisor" runat="server" Text=''></asp:Label>
+                                            </ItemTemplate>
+                                        </asp:TemplateField>
+                                    </Columns>
+                                </asp:GridView>
+                            </div>
+                            <%--Tabla de contratos--%>
+
+                            <div class="row">
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                            </div>
+                            <%--Salto de linea--%>
+                        </asp:View>
+                        <%--Vista de consulta--%>
+
+                        <asp:View ID="vContDatos" runat="server">
+                            <div class="panel col-lg-12 fa-border">
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="row form-inline">
+                                            <asp:Label ID="LblDatCont" class="col-lg-12 text-left" runat="server" Font-Bold="true" Text="Datos del contrato"></asp:Label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="row form-inline">
+                                            <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                                <label class="col-lg-4" runat="server" id="LblTxtNoCon">No. Contrato: </label>
+                                                <div class="col-lg-8">
+                                                    <asp:TextBox ID="txtNoCon" CssClass="form-control" runat="server" autocomplete="off" ReadOnly="true"></asp:TextBox>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="row form-inline">
+                                            <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                                <label class="col-lg-4" runat="server" id="LblTxtArea">Área: </label>
+                                                <div class="col-lg-8">
+                                                    <asp:TextBox ID="txtArea" CssClass="form-control" runat="server" autocomplete="off" ReadOnly="true"></asp:TextBox>
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                                <label class="col-lg-4" runat="server" id="LblEntidad">Entidad: </label>
+                                                <div class="col-lg-8">
+                                                    <asp:TextBox ID="txtEntidad" CssClass="form-control" runat="server" autocomplete="off" ReadOnly="true"></asp:TextBox>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="row form-inline">
+                                            <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                                <label class="col-lg-4" runat="server" id="LblTxtActPub">No. Acto Público: </label>
+                                                <div class="col-lg-8">
+                                                    <asp:TextBox ID="txtActPub" CssClass="form-control" runat="server" autocomplete="off" ReadOnly="true"></asp:TextBox>
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                                <label class="col-lg-4" runat="server" id="LblFecActPub">Fecha Acto Público: </label>
+                                                <div class="col-lg-8">
+                                                    <asp:TextBox ID="txtFecActPub" CssClass="form-control" runat="server" autocomplete="off" ReadOnly="true"></asp:TextBox>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="row form-inline">
+                                            <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                                <label class="col-lg-4" runat="server" id="LblRengActPub">Renglón del Acto Público: </label>
+                                                <div class="col-lg-8">
+                                                    <asp:TextBox ID="txtRengActPub" CssClass="form-control" runat="server" autocomplete="off" ReadOnly="true"></asp:TextBox>
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                                <label class="col-lg-4" runat="server" id="LblNumCobe">No. Cobe: </label>
+                                                <div class="col-lg-8">
+                                                    <asp:TextBox ID="txtNumCobe" CssClass="form-control" runat="server" autocomplete="off" ReadOnly="true"></asp:TextBox>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="row form-inline">
+                                            <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                                <label class="col-lg-4" runat="server" id="LblProv">Provincia(s) de Ejecución de la Obra: </label>
+                                                <div class="col-lg-8">
+                                                    <asp:TextBox ID="txtProv" CssClass="form-control" runat="server" autocomplete="off" ReadOnly="true"></asp:TextBox>
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                                <label class="col-lg-4" runat="server" id="LblScafid">No. Scafid: </label>
+                                                <div class="col-lg-8">
+                                                    <asp:TextBox ID="txtScafid" CssClass="form-control" runat="server" autocomplete="off" ReadOnly="true"></asp:TextBox>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="row form-inline">
+                                            <div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                <label class="col-lg-2" runat="server" id="LblDesc">
+                                                    Descripción del
+                                                    <br />
+                                                    proyecto:
+                                                </label>
+                                                <div class="col-lg-10">
+                                                    <asp:TextBox ID="txtDesc" CssClass="form-control" runat="server" autocomplete="off" MaxLength="1000" TextMode="MultiLine" Rows="3" ReadOnly="true"></asp:TextBox>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                                </div>
+
+                                <div class="col-lg-12">
+                                    <div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12 text-right">
+
+                                        <div class="col-lg-12">
+                                            <asp:Button ID="btnCancelar" class="btn btn-wd btn-primary" data-placement="left" runat="server" Text="Cancelar" ToolTip="Regresar a la pantalla de busqueda de contrato" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </asp:View>
+
+                    </asp:MultiView>
+                </asp:View>
+
+                <asp:View ID="vDuracion" runat="server">
+
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="row form-inline">
+                                <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                    <label class="col-lg-4" runat="server" id="LblMontI">Monto Inicial del Contrato: </label>
+                                    <div class="col-lg-8">
+                                        <asp:TextBox ID="txtMontI" CssClass="form-control text-right" runat="server" autocomplete="off" ReadOnly="true"></asp:TextBox>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="row form-inline">
+                                <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                    <label class="col-lg-4" runat="server" id="LblDuracionI">Duración Inicial (Días): </label>
+                                    <div class="col-lg-8">
+                                        <asp:TextBox ID="txtDuracionI" CssClass="form-control text-right" runat="server" autocomplete="off" ReadOnly="true"></asp:TextBox>
+                                    </div>
+                                </div>
+                                <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                    <label class="col-lg-4" runat="server" id="LblFechaIOP">Fecha Inicio O/P: </label>
+                                    <div class="col-lg-8">
+                                        <asp:TextBox ID="txtFechaIOP" CssClass="form-control" runat="server" autocomplete="off" ReadOnly="true"></asp:TextBox>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                    </div>
+
+                    <div class="panel col-lg-12 fa-border">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="row form-inline">
+                                    <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                        <label class="col-lg-4" runat="server" id="Label1">Costos Directos: </label>
+                                    </div>
+                                    <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                        <label class="col-lg-4" runat="server" id="Label2">Costos Indirectos: </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="row form-inline">
+                                    <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                        <label class="col-lg-3" runat="server" id="LblEstDis">Estudio y Diseño: </label>
+                                        <div class="col-lg-4">
+                                            <asp:TextBox ID="txtEstDis" CssClass="form-control text-right" runat="server" autocomplete="off" ReadOnly="true"></asp:TextBox>
+                                        </div>
+                                        <label class="col-lg-2" runat="server" id="LblPorceEstDis">Porcentaje: </label>
+                                        <div class="col-lg-3">
+                                            <asp:TextBox ID="txtPorceEstDis" CssClass="form-control text-right" runat="server" autocomplete="off" ReadOnly="true"></asp:TextBox>
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                        <label class="col-lg-3" runat="server" id="LblCostVar">Costos Varios: </label>
+                                        <div class="col-lg-4">
+                                            <asp:TextBox ID="txtCostVar" CssClass="form-control text-right" runat="server" autocomplete="off" ReadOnly="true"></asp:TextBox>
+                                        </div>
+                                        <label class="col-lg-2" runat="server" id="LblPorceCostVar">Porcentaje: </label>
+                                        <div class="col-lg-3">
+                                            <asp:TextBox ID="txtPorceCostVar" CssClass="form-control text-right" runat="server" autocomplete="off" ReadOnly="true"></asp:TextBox>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="row form-inline">
+                                    <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                        <label class="col-lg-3" runat="server" id="LblEquiSum">Equipamiento o Suministros: </label>
+                                        <div class="col-lg-4">
+                                            <asp:TextBox ID="txtEquiSum" CssClass="form-control text-right" runat="server" autocomplete="off" ReadOnly="true"></asp:TextBox>
+                                        </div>
+                                        <label class="col-lg-2" runat="server" id="LblPorceEquiSum">Porcentaje: </label>
+                                        <div class="col-lg-3">
+                                            <asp:TextBox ID="txtPorceEquiSum" CssClass="form-control text-right" runat="server" autocomplete="off" ReadOnly="true"></asp:TextBox>
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                        <label class="col-lg-3" runat="server" id="LblMante">Mantenimiento: </label>
+                                        <div class="col-lg-4">
+                                            <asp:TextBox ID="txtMante" CssClass="form-control text-right" runat="server" autocomplete="off" ReadOnly="true"></asp:TextBox>
+                                        </div>
+                                        <label class="col-lg-2" runat="server" id="LblPorceMante">Porcentaje: </label>
+                                        <div class="col-lg-3">
+                                            <asp:TextBox ID="txtPorceMante" CssClass="form-control text-right" runat="server" autocomplete="off" ReadOnly="true"></asp:TextBox>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="row form-inline">
+                                    <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                        <label class="col-lg-3" runat="server" id="LblConst">Construcción: </label>
+                                        <div class="col-lg-4">
+                                            <asp:TextBox ID="txtConst" CssClass="form-control text-right" runat="server" autocomplete="off" ReadOnly="true"></asp:TextBox>
+                                        </div>
+                                        <label class="col-lg-2" runat="server" id="LblPorceConst">Porcentaje: </label>
+                                        <div class="col-lg-3">
+                                            <asp:TextBox ID="txtPorceConst" CssClass="form-control text-right" runat="server" autocomplete="off" ReadOnly="true"></asp:TextBox>
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                        <label class="col-lg-3" runat="server" id="LblFinan">Financiamiento: </label>
+                                        <div class="col-lg-4">
+                                            <asp:TextBox ID="txtFinan" CssClass="form-control text-right" runat="server" autocomplete="off" ReadOnly="true"></asp:TextBox>
+                                        </div>
+                                        <label class="col-lg-2" runat="server" id="LblPorceFinan">Porcentaje: </label>
+                                        <div class="col-lg-3">
+                                            <asp:TextBox ID="txtPorceFinan" CssClass="form-control text-right" runat="server" autocomplete="off" ReadOnly="true"></asp:TextBox>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="row form-inline">
+                                    <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                        <label class="col-lg-3" runat="server" id="LblTotalCostDir">Total Costos Directos: </label>
+                                        <div class="col-lg-9">
+                                            <asp:TextBox ID="txtTotalCostDir" CssClass="form-control text-right" runat="server" autocomplete="off" ReadOnly="true"></asp:TextBox>
+                                        </div>
+
+                                    </div>
+                                    <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                        <label class="col-lg-3" runat="server" id="LblotalCostInd">Total Costos Indirectos: </label>
+                                        <div class="col-lg-9">
+                                            <asp:TextBox ID="txtTotalCostInd" CssClass="form-control text-right" runat="server" autocomplete="off" ReadOnly="true"></asp:TextBox>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="row form-inline">
+                                <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                </div>
+                                <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                    <label class="col-lg-4" runat="server" id="LblTotalPorce">Total Porcentaje: </label>
+                                    <div class="col-lg-4">
+                                        <asp:TextBox ID="txtTotalPorce" CssClass="form-control text-right" runat="server" autocomplete="off" ReadOnly="true"></asp:TextBox>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="row form-inline">
+                                <div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                    <label class="col-lg-2" runat="server" id="LblComent">Comentarios: </label>
+                                    <div class="col-lg-10">
+                                        <asp:TextBox ID="txtComent" CssClass="form-control" runat="server" autocomplete="off" MaxLength="1000" TextMode="MultiLine" Rows="3" ReadOnly="true"></asp:TextBox>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </asp:View>
+
+                <asp:View ID="vFianzas" runat="server">
+
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="row form-inline">
+                                <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                    <label class="col-lg-4" runat="server" id="LblMontoIFia">Monto Inicial del Contrato: </label>
+                                    <div class="col-lg-8">
+                                        <asp:TextBox ID="txtMontIFia" CssClass="form-control text-right" runat="server" autocomplete="off" ReadOnly="true"></asp:TextBox>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                    </div>
+
+                    <div class="row">
+                        <%-- Titulo del GridView --%>
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+
+                            <h5 class="text-center"><strong>
+                                <asp:Label ID="lblNoFianzas" runat="server" Visible="false" Text="No existen fianzas para este contrato."></asp:Label></strong></h5>
+
+                            <h4><strong>
+                                <asp:Label ID="LblListaFianzas" runat="server" Text="Lista de Fianzas Registradas"></asp:Label></strong></h4>
+
+                            <div class="row table-responsive">
+                                <asp:GridView ID="gvFianzas" runat="server" CssClass="table table-condensed" AutoGenerateColumns="false" ShowFooter="true" AllowPaging="True" PageSize="10" ShowHeaderWhenEmpty="true" DataKeyNames="Sec, NumPol, IdFianza, TipoFianza, Monto, VigenciaInicial, VigenciaFinal, TipoEstado, MontoFinal, FechaFinal, UsuarioRegistra, FechaRegistro, UsuarioModifica, FechaModifica" Visible="false">
+                                    <Columns>
+                                        <asp:TemplateField HeaderText="Sec" HeaderStyle-HorizontalAlign="Center">
+                                            <ItemTemplate>
+                                                <asp:Label ID="grvLblSecFian" runat="server" Text=''></asp:Label>
+                                            </ItemTemplate>
+                                        </asp:TemplateField>
+                                        <asp:ButtonField DataTextField="NumPol" HeaderText="Núm. Póliza" CommandName="SelectPoliza" ItemStyle-CssClass="text-center" HeaderStyle-CssClass="text-left"></asp:ButtonField>
+                                        <asp:TemplateField HeaderText="Tipo Póliza" HeaderStyle-HorizontalAlign="Center">
+                                            <ItemTemplate>
+                                                <asp:Label ID="grvLblTipPol" runat="server" Text=''></asp:Label>
+                                            </ItemTemplate>
+                                        </asp:TemplateField>
+                                        <asp:TemplateField HeaderText="Estatus" HeaderStyle-HorizontalAlign="Center">
+                                            <ItemTemplate>
+                                                <asp:Label ID="grvLblEstPol" runat="server" Text=''></asp:Label>
+                                            </ItemTemplate>
+                                        </asp:TemplateField>
+                                        <asp:TemplateField HeaderText="Monto Póliza (B/.)" HeaderStyle-HorizontalAlign="Center">
+                                            <ItemTemplate>
+                                                <asp:Label ID="grvLblMonPol" runat="server" Text='' ItemStyle-CssClass="dinero text-right"></asp:Label>
+                                            </ItemTemplate>
+                                        </asp:TemplateField>
+                                        <asp:TemplateField HeaderText="Vigecia Inicial" HeaderStyle-HorizontalAlign="Center">
+                                            <ItemTemplate>
+                                                <asp:Label ID="grvLblVigI" runat="server" Text=''></asp:Label>
+                                            </ItemTemplate>
+                                        </asp:TemplateField>
+                                        <asp:TemplateField HeaderText="Vigencia Final" HeaderStyle-HorizontalAlign="Center">
+                                            <ItemTemplate>
+                                                <asp:Label ID="grvLblVigFin" runat="server" Text=''></asp:Label>
+                                            </ItemTemplate>
+                                        </asp:TemplateField>
+                                        <asp:TemplateField HeaderText="Fecha Final Último Endoso" HeaderStyle-HorizontalAlign="Center">
+                                            <ItemTemplate>
+                                                <asp:Label ID="grvLblFecFinEnd" runat="server" Text=''></asp:Label>
+                                            </ItemTemplate>
+                                        </asp:TemplateField>
+                                        <asp:TemplateField HeaderText="Monto Final Último Endoso" HeaderStyle-HorizontalAlign="Center">
+                                            <ItemTemplate>
+                                                <asp:Label ID="grvLblMonFinEnd" runat="server" Text='' ItemStyle-CssClass="dinero text-right"></asp:Label>
+                                            </ItemTemplate>
+                                        </asp:TemplateField>
+                                        <asp:TemplateField HeaderText="Usuario Registra" HeaderStyle-HorizontalAlign="Center">
+                                            <ItemTemplate>
+                                                <asp:Label ID="grvLblUsuRegFin" runat="server" Text=''></asp:Label>
+                                            </ItemTemplate>
+                                        </asp:TemplateField>
+                                    </Columns>
+                                </asp:GridView>
+                            </div>
+                        </div>
+                    </div>
+
+                    <%-- Mensaje que aparece cuando no existen registros de Endosos--%>
+                    <h5 class="text-center"><strong>
+                        <asp:Label ID="lblNoEndo" runat="server" Visible="false" Text="Esta fianza no tiene endosos registrados."></asp:Label></strong></h5>
+
+                    <%-- Div donde se muestran las Fianzas almacenadas en Garantias --%>
+                    <div class="row">
+                        <%-- Titulo del GridView --%>
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" runat="server" id="dvEndo">
+                            <h5><strong>
+                                <asp:Label ID="lblTituloListaEndo" runat="server" Text="Lista de endosos registrados"></asp:Label></strong></h5>
+
+                            <asp:GridView ID="grvEndo" runat="server" CssClass="table table-responsive table-condensed left table_endoso" Width="50%"
+                                AutoGenerateColumns="False" DataKeyNames="SecNumEds, TipoEndoso, Monto, FechaFinal, UsuarioRegistra, FechaRegistro, UsuarioModifica, FechaModifica,SecFecFin,SecFecReg" Visible="false">
+                                <Columns>
+                                    <asp:TemplateField HeaderText="Endoso" HeaderStyle-HorizontalAlign="Center">
+                                        <ItemTemplate>
+                                            <asp:Label ID="grvLblEndo" runat="server" Text=''></asp:Label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="Tipo" HeaderStyle-HorizontalAlign="Center" HeaderStyle-CssClass="nosort">
+                                        <ItemTemplate>
+                                            <asp:Label ID="grvLblTipoEndo" runat="server" Text=''></asp:Label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="Monto Endoso" HeaderStyle-HorizontalAlign="Center" HeaderStyle-CssClass="nosort">
+                                        <ItemTemplate>
+                                            <asp:Label ID="grvLblMonEndo" runat="server" Text='' ItemStyle-CssClass="dinero text-right"></asp:Label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="Fecha Final" HeaderStyle-HorizontalAlign="Center" HeaderStyle-CssClass="Sort1">
+                                        <ItemTemplate>
+                                            <asp:Label ID="grvLblFecFinEndo" runat="server" Text=''></asp:Label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="Fecha Registro" HeaderStyle-HorizontalAlign="Center" HeaderStyle-CssClass="Sort2">
+                                        <ItemTemplate>
+                                            <asp:Label ID="grvLblFecRegEndo" runat="server" Text=''></asp:Label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="Usuario Registra" HeaderStyle-HorizontalAlign="Center" HeaderStyle-CssClass="nosort">
+                                        <ItemTemplate>
+                                            <asp:Label ID="grvLblUsuRegEndo" runat="server" Text=''></asp:Label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:BoundField DataField="SecFecFin" HeaderText="" HeaderStyle-HorizontalAlign="Center" HeaderStyle-CssClass="NotShow"></asp:BoundField>
+                                    <asp:BoundField DataField="SecFecReg" HeaderText="" HeaderStyle-HorizontalAlign="Center" HeaderStyle-CssClass="NotShow"></asp:BoundField>
+                                </Columns>
+                                <%--<EmptyDataTemplate>No existen registros.</EmptyDataTemplate>--%>
+                                <%-- optional--%>
+                                <FooterStyle CssClass="footerStyle" />
+                                <%-- Mandatory--%>
+                                <HeaderStyle CssClass="headerStyle" />
+                                <%-- Mandatory--%>
+                                <RowStyle CssClass="rowStyle" />
+                            </asp:GridView>
+                        </div>
+                    </div>
+                </asp:View>
+
+                <asp:View ID="vEstatus" runat="server">
+
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="row form-inline">
+                                <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                    <label class="col-lg-4" runat="server" id="LblMontIEst">Monto Inicial del Contrato: </label>
+                                    <div class="col-lg-8">
+                                        <asp:TextBox ID="txtMontIEst" CssClass="form-control text-right" runat="server" autocomplete="off" ReadOnly="true"></asp:TextBox>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                    </div>
+
+                    <div class="panel col-lg-12 fa-border" id="dvListaEstatusObra" runat="server" visible="false">
+
+                        <div class="row">
+                            <%-- Titulo del GridView --%>
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+
+                                <h4><strong>
+                                    <asp:Label ID="LblTituloGridEstatus" runat="server" Text="Lista de Estatus Registrados"></asp:Label></strong></h4>
+
+                                <asp:GridView ID="gvEstatus" runat="server" CssClass="table table-responsive table-condensed" AutoGenerateColumns="false" ShowFooter="true" AllowPaging="True" PageSize="10" ShowHeaderWhenEmpty="true" DataKeyNames="Sec,SecPorcent,SecFechaA,SecuencialAvance,Estado,PorcentajeAvance,FechaAvance,FechaReg,Observacion,UsuarioRegistra,FechaRegistro,UsuarioModifica,FechaModifica">
+                                    <Columns>
+                                        <asp:TemplateField HeaderText="Sec" HeaderStyle-HorizontalAlign="Center">
+                                            <ItemTemplate>
+                                                <asp:Label ID="grvLblSec" runat="server" Text=''></asp:Label>
+                                            </ItemTemplate>
+                                        </asp:TemplateField>
+                                        <asp:TemplateField HeaderText="Estado" HeaderStyle-HorizontalAlign="Center">
+                                            <ItemTemplate>
+                                                <asp:Label ID="grvLblEstado" runat="server" Text=''></asp:Label>
+                                            </ItemTemplate>
+                                        </asp:TemplateField>
+                                        <asp:TemplateField>
+                                            <HeaderTemplate>
+                                                <asp:LinkButton ID="linkPorcentaje" ForeColor="White" CssClass="text-center" CommandName="OrdenarPorcentaje" runat="server" ToolTip="Presione para Ordenar por Porcentaje de Avance Físico.">Porcentaje Avance Físico <i runat="server" id="sort1" class='fa fa-sort'></i></asp:LinkButton>
+                                            </HeaderTemplate>
+                                            <ItemTemplate>
+                                                <asp:Label ID="grvLblPorcentajeAvance" runat="server" Text=''></asp:Label>
+                                            </ItemTemplate>
+                                        </asp:TemplateField>
+                                        <asp:TemplateField>
+                                            <HeaderTemplate>
+                                                <asp:LinkButton ID="linkFechaAvan" ForeColor="White" CssClass="text-center" CommandName="OrdenarFecAvan" runat="server" ToolTip="Presione para Ordenar por Fecha de Avance Físico.">Fecha Avance Físico <i runat="server" id="sort2" class='fa fa-sort'></i></asp:LinkButton>
+                                            </HeaderTemplate>
+                                            <ItemTemplate>
+                                                <asp:Label ID="grvLblFechaAvance" runat="server" Text=''></asp:Label>
+                                            </ItemTemplate>
+                                        </asp:TemplateField>
+                                        <asp:TemplateField>
+                                            <HeaderTemplate>
+                                                <asp:LinkButton ID="linkFechaReg" ForeColor="White" CssClass="text-center" CommandName="OrdenarFecReg" runat="server" ToolTip="Presione para Ordenar por Fecha de Registro.">Fecha Registro <i runat="server" id="sort3" class='fa fa-sort'></i></asp:LinkButton>
+                                            </HeaderTemplate>
+                                            <ItemTemplate>
+                                                <asp:Label ID="grvLblFechaRegistro" runat="server" Text=''></asp:Label>
+                                            </ItemTemplate>
+                                        </asp:TemplateField>
+                                        <asp:TemplateField HeaderText="Observaciones" HeaderStyle-HorizontalAlign="Center">
+                                            <ItemStyle Width="30%" />
+                                            <ItemTemplate>
+                                                <asp:Label ID="grvLblObs" runat="server" Text=''></asp:Label>
+                                            </ItemTemplate>
+                                        </asp:TemplateField>
+                                        <asp:TemplateField HeaderText="Usuario Registra" HeaderStyle-HorizontalAlign="Center">
+                                            <ItemTemplate>
+                                                <asp:Label ID="grvLblUsuarioReg" runat="server" Text=''></asp:Label>
+                                            </ItemTemplate>
+                                        </asp:TemplateField>
+                                    </Columns>
+                                </asp:GridView>
+                            </div>
+                        </div>
+                    </div>
+                </asp:View>
+
+                <asp:View ID="vHisEle" runat="server">
+
+                    
+            <div class="tab-content">
+
+                <div class="row" id="dvNumConMM" runat="server" visible="true">
+                    <div class="panel col-lg-12 fa-border">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="row form-inline">
+                                    <asp:Label ID="LblDatosHisEle" class="col-lg-12 text-left" runat="server" Font-Bold="true" Text="Datos del Contrato"></asp:Label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                        </div>
+
+                        <div class="col-lg-12">
+                            <div class="row form-inline">
+                                <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                    <label class="col-lg-4">No. Contrato: </label>
+                                    <div class="col-lg-8">
+                                        <asp:TextBox ID="txtNoContHisEle" CssClass="form-control" runat="server" autocomplete="off" ReadOnly="true"></asp:TextBox>
+                                    </div>
+                                </div>
+
+                                <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                    <label class="col-lg-4">Fecha Contrato: </label>
+                                    <div class="col-lg-8">
+                                        <asp:TextBox ID="txtFecContHisEle" CssClass="form-control" runat="server" autocomplete="off" ReadOnly="true" data-date-format="dd/M/yyyy" data-date-language="es"></asp:TextBox>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                        </div>
+                        <%--Salto de linea--%>
+                    </div>
+                </div>
+            </div>
+                    <uc2:ucHistorialElectronico runat="server" ID="ucHistorialElectronico" />
+                </asp:View>
+
+                <asp:View ID="vEmpAdj" runat="server">
+                    <asp:TextBox ID="hdIdActoPublicoEmpAdj" runat="server" CssClass="Oculto"></asp:TextBox>
+                    <asp:TextBox ID="hdIdTipEmp" runat="server" CssClass="Oculto"></asp:TextBox>
+                    <asp:TextBox ID="hdIdEmp" runat="server" CssClass="Oculto"></asp:TextBox>
+                    <asp:TextBox ID="hdDesEmp" runat="server" CssClass="Oculto"></asp:TextBox>
+
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="row form-inline">
+                                <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                    <label class="col-lg-4" runat="server" id="LblMonIEmpAdj">Monto Inicial del Contrato: </label>
+                                    <div class="col-lg-8">
+                                        <asp:TextBox ID="txtMonIEmpAdj" CssClass="form-control text-right" runat="server" autocomplete="off" ReadOnly="true"></asp:TextBox>
+                                    </div>
+                                </div>
+                                <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                    <label class="col-lg-4" runat="server" id="LblFechaRef">Fecha Refrendo: </label>
+                                    <div class="col-lg-8">
+                                        <asp:TextBox ID="txtFechaRefEmpAdj" CssClass="form-control" runat="server" autocomplete="off" ReadOnly="true"></asp:TextBox>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="row form-inline">
+                                <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                    <div class="col-lg-8">
+                                        <asp:CheckBox ID="ChkControlPrev" runat="server" Enabled="false" Text="   Periodo sin control previo" />
+                                    </div>
+                                </div>
+
+                                <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                    <label class="col-lg-4" runat="server" id="LblObsRef">Observaciones de Refrendo: </label>
+                                    <div class="col-lg-8">
+                                        <asp:TextBox ID="txtObsRef" CssClass="form-control" runat="server" autocomplete="off" MaxLength="1000" TextMode="MultiLine" Rows="3" ReadOnly="true"></asp:TextBox>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel-body">
+
+                        <div class="row">
+
+                            <div id="dvNoAdju" runat="server" class="Oculto">
+                                <h3 class="text-center"><strong>
+                                    <asp:Label ID="lblMensajeNoAdju" runat="server" Style="text-align: center"></asp:Label></strong></h3>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                            </div>
+
+                            <div id="dvGridAdju" runat="server" class="Oculto">
+                                <asp:TextBox runat="server" ID="hdCodTipoEmpresa" CssClass="Oculto"></asp:TextBox>
+                                <asp:TextBox runat="server" ID="hdCodEmpresaProponente" CssClass="Oculto"></asp:TextBox>
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                        <h4 class="text-center"><strong>
+                                            <asp:Label ID="lblTituloGridAdju_TabAdju" runat="server"
+                                                Style="text-align: center" Text="Empresa Adjudicada"></asp:Label></strong></h4>
+                                        <asp:GridView ID="grvEmpAdjudicada" runat="server" CssClass="table table-responsive table-condensed"
+                                            AutoGenerateColumns="False" AllowPaging="True" PageSize="10" DataKeyNames="Secuencia, CodTipoEmpresa, CodEmpresaProponente, CodigoProponente, NumRenglon, IdRenglonActo, DescripcionRenglon, NombreProponente, Monto, descAdjudicado, DescTipoEmpresa, IdProponente, UsuarioRegistra, FechaRegistro, UsuarioModifica, FechaModifica">
+                                            <Columns>
+                                                <asp:BoundField DataField="NumRenglon" HeaderText="Renglón" HeaderStyle-HorizontalAlign="Center" ItemStyle-BorderStyle="Solid"></asp:BoundField>
+                                                <asp:BoundField DataField="DescripcionRenglon" HeaderText="Descripción Renglón" HeaderStyle-HorizontalAlign="Center" ItemStyle-BorderStyle="Solid"></asp:BoundField>
+                                                <%--<asp:ButtonField DataTextField="CodigoProponente" HeaderText="Código" HeaderStyle-HorizontalAlign="Center" CommandName="SelectProp" ItemStyle-BorderStyle="Solid"></asp:ButtonField>--%>
+                                                <asp:BoundField DataField="CodigoProponente" HeaderText="Código" HeaderStyle-HorizontalAlign="Center" ItemStyle-BorderStyle="Solid"></asp:BoundField>
+                                                <asp:BoundField DataField="NombreProponente" HeaderText="Nombre de la Empresa" HeaderStyle-HorizontalAlign="Center" ItemStyle-BorderStyle="Solid"></asp:BoundField>
+                                                <asp:BoundField DataField="RUC" HeaderText="RUC" HeaderStyle-HorizontalAlign="Center" ItemStyle-BorderStyle="Solid"></asp:BoundField>
+                                                <asp:BoundField DataField="DV" HeaderText="DV" HeaderStyle-HorizontalAlign="Center" ItemStyle-BorderStyle="Solid"></asp:BoundField>
+                                                <asp:BoundField HeaderText="Monto (B/.)" DataField="Monto" HeaderStyle-HorizontalAlign="Center" ItemStyle-CssClass="dinero text-right" />
+                                                <asp:BoundField HeaderText="Adjudicado" DataField="descAdjudicado" HeaderStyle-HorizontalAlign="Center" ItemStyle-CssClass="text-center" />
+                                                <asp:BoundField HeaderText="Tipo" DataField="DescTipoEmpresa" HeaderStyle-HorizontalAlign="Center" ItemStyle-CssClass="" />
+                                                <asp:BoundField HeaderText="Usuario Registra" DataField="UsuarioRegistra" HeaderStyle-HorizontalAlign="Center" ItemStyle-CssClass="" />
+                                            </Columns>
+                                        </asp:GridView>
+                                    </div>
+
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                                </div>
+
+                                <div class="row">
+                                    <h4 class="text-center"><strong>
+                                        <asp:Label ID="lblTituloGridConsorcioAdju_TabAdju" runat="server"
+                                            Style="text-align: center" Text=""></asp:Label></strong></h4>
+                                    <asp:GridView ID="grvConsorcioAdju" runat="server"
+                                        CssClass="table table-responsive table-condensed center" Width="50%"
+                                        AutoGenerateColumns="False" DataKeyNames="secuencial,idEmpresaGrupoRelacion, Codigo, nomEmpresa"><%--AllowPaging="True" PageSize="10"--%>
+                                        <Columns>
+                                            <asp:BoundField HeaderText="Sec." DataField="secuencial" ItemStyle-CssClass="" />
+                                            <asp:BoundField HeaderText="Código" DataField="Codigo" ItemStyle-CssClass="" />
+                                            <asp:BoundField HeaderText="Nombre" DataField="nomEmpresa" ItemStyle-CssClass="" />
+                                        </Columns>
+                                    </asp:GridView>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12 text-right">
+                                            <div class="col-lg-12">
+                                                <asp:Button ID="btnProponentes" class="btn btn-wd btn-primary" data-placement="left" runat="server" Text="Ver Proponentes" ToolTip="Presione para ver los proponentes." />
+                                                <asp:Button ID="btnEmpGru" class="btn btn-wd btn-primary" data-placement="left" runat="server" Text="Ver Empresas del Grupo" ToolTip="Presiona para Mostrar las empresas  que conforman el consorcio o asociación de la empresa adjudicada." />
+                                                <asp:Button ID="btnJunDir" class="btn btn-wd btn-primary" data-placement="left" runat="server" Text="Ver Junta Directiva" ToolTip="Presione para Mostrar la junta directiva a la fecha de refrendo del contrato." />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <asp:MultiView ID="mvEmpAdj" runat="server">
+
+                                    <asp:View ID="vEAProponente" runat="server">
+                                        <div class="row">
+                                            <h4 class="text-center"><strong>
+                                                <asp:Label ID="lblTituloGridProponente" runat="server" Visible="false"
+                                                    Style="text-align: center" Text="Lista de Proponentes"></asp:Label></strong></h4>
+
+                                            <h5 class="text-center"><strong>
+                                                <asp:Label ID="lblNoPropo" runat="server" Visible="false"
+                                                    Style="text-align: center" Text="No tiene proponentes."></asp:Label></strong></h5>
+
+                                            <asp:GridView ID="grvProponentes" runat="server" CssClass="table table-responsive table-condensed center"
+                                                AutoGenerateColumns="False" AllowPaging="True" PageSize="10" DataKeyNames="Secuencia, IdRenglonActo, NumRenglon, CodigoProponente, NombreProponente, Monto, descAdjudicado, CodTipoEmpresa, DescTipoEmpresa, IdProponente, Eliminar, UsuarioRegistra, 
+                                                FechaRegistro, UsuarioModifica, FechaModifica, CodEmpresaProponente">
+                                                <Columns>
+                                                    <asp:ButtonField DataTextField="IdProponente" HeaderText="Id" CommandName="Select" ItemStyle-BorderStyle="Solid" ItemStyle-CssClass="Oculto ClassIdProp" ItemStyle-Width="5%" HeaderStyle-CssClass="Oculto"></asp:ButtonField>
+                                                    <asp:BoundField HeaderText="Renglón" DataField="NumRenglon" ItemStyle-CssClass="" />
+                                                    <asp:BoundField HeaderText="Sec." DataField="Secuencia" ItemStyle-CssClass="" />
+                                                    <asp:ButtonField DataTextField="CodigoProponente" HeaderText="Código" CommandName="SelectProp" ItemStyle-BorderStyle="Solid"></asp:ButtonField>
+                                                    <asp:BoundField HeaderText="Nombre de Proponente" DataField="NombreProponente" ItemStyle-CssClass="" />
+                                                    <asp:BoundField HeaderText="Monto (B/.)" DataField="Monto" ItemStyle-CssClass="dinero text-right" />
+                                                    <asp:BoundField HeaderText="Adjudicado" DataField="descAdjudicado" ItemStyle-CssClass="text-center" />
+                                                    <asp:BoundField HeaderText="Tipo" DataField="DescTipoEmpresa" ItemStyle-CssClass="" />
+                                                    <asp:BoundField HeaderText="Fecha Registra" DataField="FechaRegistro" ItemStyle-CssClass="" Visible="false" />
+                                                    <asp:BoundField HeaderText="Usuario Registra" DataField="UsuarioRegistra" ItemStyle-CssClass="" />
+                                                    <asp:BoundField HeaderText="Fecha Modifica" DataField="FechaModifica" ItemStyle-CssClass="" Visible="false" />
+                                                    <asp:BoundField HeaderText="Usuario Modifica" DataField="UsuarioModifica" ItemStyle-CssClass="" Visible="false" />
+                                                </Columns>
+                                            </asp:GridView>
+                                        </div>
+
+                                        <div class="row" id="dvEmpresasConsorcio" runat="server">
+                                            <h4 class="text-center"><strong>
+                                                <asp:Label ID="lblTitutloGrvEmpresasCons_Asc" runat="server" Visible="false"
+                                                    Style="text-align: center"></asp:Label></strong></h4>
+                                            <asp:GridView ID="grvEmpresasConsorcio" runat="server"
+                                                CssClass="table table-responsive table-condensed center" Width="50%"
+                                                AutoGenerateColumns="False" DataKeyNames="secuencial,idEmpresaGrupoRelacion, Codigo, nomEmpresa"> <%--AllowPaging="True" PageSize="10" --%>
+                                                <Columns>
+                                                    <asp:BoundField HeaderText="Sec." DataField="secuencial" ItemStyle-CssClass="" />
+                                                    <asp:BoundField HeaderText="Código" DataField="Codigo" ItemStyle-CssClass="" />
+                                                    <asp:BoundField HeaderText="Nombre Proponente" DataField="nomEmpresa" ItemStyle-CssClass="" />
+                                                </Columns>
+                                            </asp:GridView>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-lg-12">
+                                                <div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12 text-right">
+                                                    <div class="col-lg-12">
+                                                        <asp:Button ID="btnCerrarEAP" class="btn btn-wd btn-primary" data-placement="left" runat="server" Text="Cerrar" ToolTip="Presione para cerrar" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </asp:View>
+
+                                    <asp:View ID="vEAEmpresas" runat="server">
+                                        <div class="row">
+                                            <h4 class="text-center"><strong>
+                                                <asp:Label ID="lblTituloGridConsorcioAdju_TabAdju2" runat="server"
+                                                    Style="text-align: center" Text=""></asp:Label></strong></h4>
+                                            <asp:GridView ID="grvConsorcioAdju2" runat="server"
+                                                CssClass="table table-responsive table-condensed center"
+                                                AutoGenerateColumns="False" DataKeyNames="secuencial,idEmpresaGrupoRelacion, Codigo, nomEmpresa"> <%--AllowPaging="True" PageSize="10"--%>
+                                                <Columns>
+                                                    <asp:BoundField HeaderText="Sec." DataField="secuencial" ItemStyle-CssClass="" />
+                                                    <asp:BoundField HeaderText="Código" DataField="Codigo" ItemStyle-CssClass="" />
+                                                    <asp:BoundField HeaderText="Nombre" DataField="nomEmpresa" ItemStyle-CssClass="" />
+                                                </Columns>
+                                            </asp:GridView>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-lg-12">
+                                                <div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12 text-right">
+                                                    <div class="col-lg-12">
+                                                        <asp:Button ID="btnCerrarEAE" class="btn btn-wd btn-primary" data-placement="left" runat="server" Text="Cerrar" ToolTip="Presione para cerrar" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </asp:View>
+
+                                    <asp:View ID="vEAJuntaDirectiva" runat="server">
+                                        <div class="row">
+                                            <h4 class="text-center"><strong>
+                                                <asp:Label ID="lblJunDir" runat="server"
+                                                    Style="text-align: center" Text="Lista de Junta Directiva"></asp:Label></strong></h4>
+
+                                            <asp:GridView ID="gvJuntaDirectiva" runat="server" CssClass="table table-responsive table-condensed center"
+                                                AutoGenerateColumns="False" AllowPaging="True" PageSize="10" DataKeyNames="Nombre, Cargo, FechaDesde">
+                                                <Columns>
+                                                    <asp:BoundField HeaderText="Nombre" DataField="Nombre" ItemStyle-CssClass="" />
+                                                    <asp:BoundField HeaderText="Cargo" DataField="Cargo" ItemStyle-CssClass="" />
+                                                    <asp:BoundField HeaderText="Fecha Desde" DataField="FechaDesde" ItemStyle-CssClass="" />
+                                                </Columns>
+                                            </asp:GridView>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-lg-12">
+                                                <div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12 text-right">
+                                                    <div class="col-lg-12">
+                                                        <asp:Button ID="btnCerrarEAJ" class="btn btn-wd btn-primary" data-placement="left" runat="server" Text="Cerrar" ToolTip="Presione para cerrar" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </asp:View>
+
+                                </asp:MultiView>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                    <%--</div>--%>
+                </asp:View>
+
+                <asp:View ID="vActas" runat="server">
+
+                    <div class="row">
+                        <div class="col-lg-12">
+                             <div class="row">
+                            <div class="col-lg-12">
+                                <div class="row form-inline">
+                                    <asp:Label ID="LblDatosActas" class="col-lg-12 text-left" runat="server" Font-Bold="true" Text="Datos del Contrato"></asp:Label>
+                                </div>
+                            </div>
+                        </div>
+                            <div class="row">
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                    </div>
+
+                            <div class="row form-inline">
+                                <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                    <label class="col-lg-3" runat="server" id="LblAreaActas">Área: </label>
+                                    <div class="col-lg-9">
+                                        <asp:TextBox ID="txtAreaActas" CssClass="form-control" runat="server" autocomplete="off" ReadOnly="true"></asp:TextBox>
+                                    </div>
+                                </div>
+                                <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                    <label class="col-lg-2" runat="server" id="LblEntidadActas">Entidad: </label>
+                                    <div class="col-lg-10">
+                                        <asp:TextBox ID="txtEntidadActas" CssClass="form-control" runat="server" autocomplete="off" ReadOnly="true"></asp:TextBox>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="row form-inline">
+                                <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                    <label class="col-lg-3" runat="server" id="LblNoConActas">No. Contrato: </label>
+                                    <div class="col-lg-9">
+                                        <asp:TextBox ID="txtNoConActas" CssClass="form-control" runat="server" autocomplete="off" ReadOnly="true"></asp:TextBox>
+                                    </div>
+                                </div>
+                                <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                    <label class="col-lg-2" runat="server" id="LblTipoActas">Tipo: </label>
+                                    <div class="col-lg-10">
+                                        <asp:DropDownList ID="ddlTipoActas" CssClass="form-control" runat="server" AutoPostBack="true" autocomplete="off"></asp:DropDownList>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                    </div>
+
+                    <h5 class="text-center"><strong>
+                        <asp:Label ID="LblNoTipoActas" runat="server" Visible="false" Style="text-align: center" Text="No existen actas de este tipo."></asp:Label></strong></h5>
+
+                    <div class="row">
+                        <%-- Titulo del GridView --%>
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+
+                            <h4><strong>
+                                <asp:Label ID="LblTituloActas" runat="server" Text="Lista de Actas Registradas"></asp:Label></strong></h4>
+
+                            <asp:GridView ID="gvActas" runat="server" CssClass="table table-responsive table-condensed" AutoGenerateColumns="false" ShowFooter="true" AllowPaging="True" PageSize="10" ShowHeaderWhenEmpty="true" DataKeyNames="IdActa, Secuencia,TipoActa,DescripcionTipoActa,NumeroActa,FechaRecepcion,Porcentaje,FechaRegistro,Monto,Observacion,UsuarioRegistra,UsuarioModifica,FechaModifica,Adjunto" Visible="true">
+                                <Columns>
+                                    <asp:TemplateField HeaderText="Sec" HeaderStyle-HorizontalAlign="Center">
+                                        <ItemTemplate>
+                                            <asp:Label ID="grvLblSecActa" runat="server" Text=''></asp:Label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="Tipo" HeaderStyle-HorizontalAlign="Center">
+                                        <ItemTemplate>
+                                            <asp:Label ID="grvLblTipoActa" runat="server" Text=''></asp:Label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="No. Acta" HeaderStyle-HorizontalAlign="Center">
+                                        <ItemTemplate>
+                                            <asp:Label ID="grvLblNumActa" runat="server" Text=''></asp:Label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="Fecha de Recepción" HeaderStyle-HorizontalAlign="Center">
+                                        <ItemTemplate>
+                                            <asp:Label ID="grvLblFecRec" runat="server" Text=''></asp:Label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="Porcentaje Recibido (%)" HeaderStyle-HorizontalAlign="Center">
+                                        <ItemTemplate>
+                                            <asp:Label ID="grvLblPorRec" runat="server" Text=''></asp:Label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="Fecha de Registro" HeaderStyle-HorizontalAlign="Center">
+                                        <ItemTemplate>
+                                            <asp:Label ID="grvLblFecRegActa" runat="server" Text=''></asp:Label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="Monto" HeaderStyle-HorizontalAlign="Center">
+                                        <ItemTemplate>
+                                            <asp:Label ID="grvLblMontoActa" runat="server" Text=''></asp:Label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="Observaciones" HeaderStyle-HorizontalAlign="Center">
+                                        <ItemTemplate>
+                                            <asp:Label ID="grvLblObsActa" runat="server" Text=''></asp:Label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:TemplateField HeaderText="Usuario Registra" HeaderStyle-HorizontalAlign="Center">
+                                        <ItemTemplate>
+                                            <asp:Label ID="grvLblUsuRegActa" runat="server" Text=''></asp:Label>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>
+                                    <asp:ButtonField DataTextField="Adjunto" HeaderText="Adjunto" CommandName="SelectAdju" ItemStyle-BorderStyle="Solid" ItemStyle-CssClass="" HeaderStyle-CssClass="text-left"></asp:ButtonField>
+
+                                    <%--<asp:TemplateField HeaderText="Adjunto" HeaderStyle-HorizontalAlign="Center">
+                                        <ItemTemplate>
+                                        </ItemTemplate>
+                                    </asp:TemplateField>--%>
+                                </Columns>
+                            </asp:GridView>
+                        </div>
+                    </div>
+                </asp:View>
+
+                <asp:View ID="vSalDes" runat="server">
+
+                    <ul id="TabSalDes" class="nav nav-tabs" role="tablist">
+                        <li class="nav-item" id="navTapSDContrato" runat="server">
+                            <asp:LinkButton ID="TapSDContrato" runat="server"><i class='fa fa-pencil'></i> A Contratos</asp:LinkButton>
+                        </li>
+                        <li class="nav-item " id="navTapSDCosAdi" runat="server">
+                            <asp:LinkButton ID="TapSDCosAdi" runat="server"><i class='fa fa-pencil'></i> A Costos Adicionales</asp:LinkButton>
+                        </li>
+                        <li class="nav-item " id="navTapSDSalPro" runat="server">
+                            <asp:LinkButton ID="TapSDSalPro" runat="server"><i class='fa fa-book'></i> Saldo del Proyecto</asp:LinkButton>
+                        </li>
+                    </ul>
+
+                    <asp:MultiView ID="mvSalDes" runat="server">
+                        <asp:View ID="vSDContrato" runat="server">
+                            <%-- Salto --%>
+                            <div class="row">
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                            </div>
+
+                            <%-- Contrato Obra --%>
+                            <div>
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="row form-inline">
+                                            <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                                <label class="col-lg-5">Monto Inicial del Contrato Obra (B/.): </label>
+                                                <div class="col-lg-7">
+                                                    <asp:TextBox ID="txtMntIniCO" CssClass="form-control text-right dineroNeg" runat="server" autocomplete="off" ReadOnly="true" Style="text-align: right"></asp:TextBox>
+                                                </div>
+                                            </div>
+                                            <div id="dvtxtMntFCO" runat="server" class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                                <label class="col-lg-5">Total Facturado Obra(B/.): </label>
+                                                <div class="col-lg-7">
+                                                    <asp:TextBox ID="txtMntFCO" CssClass="form-control text-right dineroNeg" runat="server" autocomplete="off" ReadOnly="true" Style="text-align: right"></asp:TextBox>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <%-- Salto --%>
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="row form-inline">
+                                            <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                                <label class="col-lg-5">Monto Anticipo (B/.): </label>
+                                                <div class="col-lg-7">
+                                                    <asp:TextBox ID="txtMntAntCO" CssClass="form-control text-right dineroNeg" runat="server" autocomplete="off" ReadOnly="true" Style="text-align: right"></asp:TextBox>
+                                                </div>
+                                            </div>
+                                            <div id="dvtxtSldCO" runat="server" class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                                <label class="col-lg-5">Saldo del Contrato Obra (B/.): </label>
+                                                <div class="col-lg-7">
+                                                    <asp:TextBox ID="txtSldCO" CssClass="form-control text-right dineroNeg" runat="server" autocomplete="off" ReadOnly="true" Style="text-align: right"></asp:TextBox>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <%-- Salto --%>
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="row form-inline">
+                                            <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                                <label class="col-lg-5">Monto Final del Contrato (B/.) con Adenda: </label>
+                                                <div class="col-lg-7">
+                                                    <asp:TextBox ID="txtMntFConAdCO" CssClass="form-control text-right dineroNeg" runat="server" autocomplete="off" ReadOnly="true" Style="text-align: right"></asp:TextBox>
+                                                </div>
+                                            </div>
+                                            <div id="dvtxtSldRetxPgCO" runat="server" class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                                <label class="col-lg-5">Saldo Retenido por Pagar (B/.): </label>
+                                                <div class="col-lg-7">
+                                                    <asp:TextBox ID="txtSldRetxPgCO" CssClass="form-control text-right dineroNeg" runat="server" autocomplete="off" ReadOnly="true" Style="text-align: right"></asp:TextBox>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <%-- Salto --%>
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="row form-inline">
+                                            <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                            </div>
+                                            <div id="dvtxtSldAntCO" runat="server" class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                                <label class="col-lg-5">Saldo Anticipo (B/.): </label>
+                                                <div class="col-lg-7">
+                                                    <asp:TextBox ID="txtSldAntCO" CssClass="form-control text-right dineroNeg" runat="server" autocomplete="off" ReadOnly="true" Style="text-align: right"></asp:TextBox>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <%-- Salto --%>
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                                </div>
+                            </div>
+
+                            <%-- Div donde se muestran los Desembolsos listados --%>
+                            <div class="row">
+                                <%-- Titulo del GridView --%>
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="dvListadoDesembolsosC" runat="server" visible="false">
+                                    <h4><strong>
+                                        <asp:Label ID="lblTituloGridDesembolsosC" runat="server"
+                                            Text="Lista de Desembolsos Registrados"></asp:Label></strong></h4>
+                                    <div class="table-responsive">
+                                        <asp:GridView ID="grvDesembolsosC" runat="server" CssClass="table table-condensed GrvDt1"
+                                            AutoGenerateColumns="False" DataKeyNames="Sec,IdDesembolso,NoGestion,FechaPresentacion,TipoDesembolso,TipoCstAdicional,
+                                                    NumCostoAdi,ValorBruto,RetencionGarant,DevolucionRetGarant,AmortizacionAnticipo,PorcentItbms,ItbmsTotal,RetencionItbms,Otros,ValorNetoPag,
+                                                    UsuarioRegistra,FechaRegistro,UsuarioModifica,FechaModifica"
+                                            ShowFooter="true" AllowPaging="True" PageSize="10">
+                                            <Columns>
+                                                <asp:BoundField HeaderText="Sec" DataField="Sec" ItemStyle-CssClass="" HeaderStyle-CssClass="text-left nosort" />
+                                                <asp:BoundField HeaderText="Id" DataField="IdDesembolso" ItemStyle-CssClass="" Visible="false" />
+                                                <asp:BoundField HeaderText="No. Gestión" DataField="NoGestion" ItemStyle-CssClass="" HeaderStyle-CssClass="text-left " />
+                                                <%--<asp:BoundField HeaderText="Fecha Presentación" DataField="FechaPresentacion" ItemStyle-CssClass="" HeaderStyle-CssClass="text-left " />
+                                                    <asp:BoundField HeaderText="Tipo de CA" DataField="TipoCstAdicional" ItemStyle-CssClass="" HeaderStyle-CssClass="text-left nosort" />
+                                                    <asp:BoundField HeaderText="No. Contrato (I/C)" DataField="NumCostoAdi" ItemStyle-CssClass="" HeaderStyle-CssClass="text-left nosort" />--%>
+                                                <asp:BoundField HeaderText="Valor Bruto Facturado" DataField="ValorBruto" HeaderStyle-CssClass="text-right" ItemStyle-CssClass="text-right" FooterStyle-CssClass="text-right dineroNeg" />
+                                                <asp:BoundField HeaderText="Retención por Garantía" DataField="RetencionGarant" HeaderStyle-CssClass="text-right nosort" ItemStyle-CssClass="text-right" FooterStyle-CssClass="text-right dineroNeg" />
+                                                <asp:BoundField HeaderText="Devolución de Retenido" DataField="DevolucionRetGarant" HeaderStyle-CssClass="text-right nosort" ItemStyle-CssClass="text-right" FooterStyle-CssClass="text-right dineroNeg" />
+                                                <asp:BoundField HeaderText="Amortización de Anticipo" DataField="AmortizacionAnticipo" HeaderStyle-CssClass="text-right nosort" ItemStyle-CssClass="text-right" FooterStyle-CssClass="text-right dineroNeg" />
+                                                <asp:BoundField HeaderText="ITBMS Total" DataField="ItbmsTotal" HeaderStyle-CssClass="text-right nosort" ItemStyle-CssClass="text-right" FooterStyle-CssClass="text-right dineroNeg" />
+                                                <asp:BoundField HeaderText="Retención de ITBMS (50%)" DataField="RetencionItbms" HeaderStyle-CssClass="text-right nosort" ItemStyle-CssClass="text-right" FooterStyle-CssClass="text-right dineroNeg" />
+                                                <asp:BoundField HeaderText="Otros" DataField="Otros" HeaderStyle-CssClass="text-right nosort" ItemStyle-CssClass="text-right" FooterStyle-CssClass="text-right dineroNeg" />
+                                                <asp:BoundField HeaderText="Valor Neto Pagado" DataField="ValorNetoPag" HeaderStyle-CssClass="text-right nosort" ItemStyle-CssClass="text-right" FooterStyle-CssClass="text-right dineroNeg" />
+                                                <asp:BoundField HeaderText="Fecha Registra" DataField="FechaRegistro" ItemStyle-CssClass="" Visible="false" />
+                                                <asp:BoundField HeaderText="Usuario Registra" DataField="UsuarioRegistra" HeaderStyle-CssClass="nosort" ItemStyle-CssClass="" />
+                                                <asp:BoundField HeaderText="Fecha Modifica" DataField="FechaModifica" ItemStyle-CssClass="" Visible="false" />
+                                                <asp:BoundField HeaderText="Usuario Modifica" DataField="UsuarioModifica" ItemStyle-CssClass="" Visible="false" />
+
+                                                <%--<asp:BoundField HeaderText="SecFecPre" DataField="SecFecPre" ItemStyle-CssClass="" />--%>
+                                            </Columns>
+                                            <%--<EmptyDataTemplate>No existen registros.</EmptyDataTemplate>--%>
+                                            <%-- optional--%>
+                                            <FooterStyle CssClass="footerStyle" />
+                                            <%-- Mandatory--%>
+                                            <HeaderStyle CssClass="headerStyle" />
+                                            <%-- Mandatory--%>
+                                            <RowStyle CssClass="rowStyle" />
+                                        </asp:GridView>
+                                    </div>
+                                </div>
+                            </div>
+                        </asp:View>
+
+                        <asp:View ID="vSDCosAdi" runat="server">
+                            <%-- Salto --%>
+                            <div class="row">
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                            </div>
+
+                            <%-- Costo Adicional --%>
+                            <div>
+                                <%-- No Contrato & Fecha de Contrato --%>
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="row form-inline">
+                                            <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                                <%--<label id="lblNoCostoAdi" runat="server" class="col-lg-5"></label>
+                                                    <div class="col-lg-7">
+                                                        <asp:TextBox ID="txtNoCostoAdi" CssClass="form-control" runat="server" autocomplete="off"></asp:TextBox>
+                                                        <asp:TextBox ID="hd_IdCostA" CssClass="Oculto" runat="server"></asp:TextBox>
+                                                        <asp:TextBox ID="hd_NoCostoAdi" CssClass="Oculto" runat="server"></asp:TextBox>
+                                                        <asp:TextBox ID="hd_TipoCstBus" CssClass="Oculto" runat="server"></asp:TextBox>
+                                                        <asp:TextBox ID="hd_MntIniCA" CssClass="Oculto" runat="server"></asp:TextBox>
+                                                        <asp:TextBox ID="hd_MntAntCA" CssClass="Oculto" runat="server"></asp:TextBox>
+                                                        <asp:TextBox ID="hd_MntFConAdCA" CssClass="Oculto" runat="server"></asp:TextBox>
+                                                    </div>--%>
+                                            </div>
+                                            <div id="dvtxtMntFCA" runat="server" class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                                <label class="col-lg-5">Total Facturado CA(B/.): </label>
+                                                <div class="col-lg-7">
+                                                    <asp:TextBox ID="txtMntFCA" CssClass="form-control text-right dineroNeg" runat="server" autocomplete="off" ReadOnly="true" Style="text-align: right"></asp:TextBox>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <%-- Salto --%>
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="row form-inline">
+                                            <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                                <label class="col-lg-5">Monto  Inicial del Contrato CA (B/.): </label>
+                                                <div class="col-lg-7">
+                                                    <asp:TextBox ID="txtMntIniCA" CssClass="form-control text-right dineroNeg" runat="server" autocomplete="off" ReadOnly="true" Style="text-align: right"></asp:TextBox>
+                                                </div>
+                                            </div>
+                                            <div id="dvtxtSldCA" runat="server" class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                                <label class="col-lg-5">Saldo del Contrato CA(B/.): </label>
+                                                <div class="col-lg-7">
+                                                    <asp:TextBox ID="txtSldCA" CssClass="form-control text-right dineroNeg" runat="server" autocomplete="off" ReadOnly="true" Style="text-align: right"></asp:TextBox>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <%-- Salto --%>
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="row form-inline">
+                                            <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                                <label class="col-lg-5">Monto Anticipo CA (B/.): </label>
+                                                <div class="col-lg-7">
+                                                    <asp:TextBox ID="txtMntAntCA" CssClass="form-control text-right dineroNeg" runat="server" autocomplete="off" ReadOnly="true" Style="text-align: right"></asp:TextBox>
+                                                </div>
+                                            </div>
+                                            <div id="dvtxtSldRetxPgCA" runat="server" class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                                <label class="col-lg-5">Saldo Retenido por Pagar CA (B/.): </label>
+                                                <div class="col-lg-7">
+                                                    <asp:TextBox ID="txtSldRetxPgCA" CssClass="form-control text-right dineroNeg" runat="server" autocomplete="off" ReadOnly="true" Style="text-align: right"></asp:TextBox>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <%-- Salto --%>
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="row form-inline">
+                                            <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                                <label class="col-lg-5">Monto Final del Contrato CA con Adenda(B/.): </label>
+                                                <div class="col-lg-7">
+                                                    <asp:TextBox ID="txtMntFConAdCA" CssClass="form-control text-right dineroNeg" runat="server" autocomplete="off" ReadOnly="true" Style="text-align: right"></asp:TextBox>
+                                                </div>
+                                            </div>
+                                            <div id="dvtxtSldAntCA" runat="server" class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                                <label class="col-lg-5">Saldo Anticipo CA (B/.): </label>
+                                                <div class="col-lg-7">
+                                                    <asp:TextBox ID="txtSldAntCA" CssClass="form-control text-right dineroNeg" runat="server" autocomplete="off" ReadOnly="true" Style="text-align: right"></asp:TextBox>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <%-- Salto --%>
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                                </div>
+                            </div>
+
+                            <%-- Div donde se muestran los Desembolsos listados --%>
+                            <div class="row">
+                                <%-- Titulo del GridView --%>
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" id="dvListadoDesembolsosA" runat="server" visible="false">
+                                    <h4><strong>
+                                        <asp:Label ID="lblTituloGridDesembolsosA" runat="server"
+                                            Text="Lista de Desembolsos Registrados"></asp:Label></strong></h4>
+                                    <div class="table-responsive">
+                                        <asp:GridView ID="grvDesembolsosA" runat="server" CssClass="table table-condensed GrvDt1"
+                                            AutoGenerateColumns="False" DataKeyNames="Sec,IdDesembolso,NoGestion,FechaPresentacion,TipoDesembolso,TipoCstAdicional,
+                                                    NumCostoAdi,ValorBruto,RetencionGarant,DevolucionRetGarant,AmortizacionAnticipo,PorcentItbms,ItbmsTotal,RetencionItbms,Otros,ValorNetoPag,
+                                                    UsuarioRegistra,FechaRegistro,UsuarioModifica,FechaModifica"
+                                            ShowFooter="true" AllowPaging="True" PageSize="10">
+                                            <Columns>
+                                                <asp:BoundField HeaderText="Sec" DataField="Sec" ItemStyle-CssClass="" HeaderStyle-CssClass="text-left nosort" />
+                                                <asp:BoundField HeaderText="Id" DataField="IdDesembolso" ItemStyle-CssClass="" Visible="false" />
+                                                <asp:BoundField HeaderText="No. Gestión" DataField="NoGestion" ItemStyle-CssClass="" HeaderStyle-CssClass="text-left " />
+                                                <%--<asp:BoundField HeaderText="Fecha Presentación" DataField="FechaPresentacion" ItemStyle-CssClass="" HeaderStyle-CssClass="text-left " />--%>
+                                                <asp:BoundField HeaderText="Tipo de CA" DataField="TipoCstAdicional" ItemStyle-CssClass="" HeaderStyle-CssClass="text-left nosort" />
+                                                <asp:BoundField HeaderText="No. Contrato (I/C)" DataField="NumCostoAdi" ItemStyle-CssClass="" HeaderStyle-CssClass="text-left nosort" />
+                                                <asp:BoundField HeaderText="Valor Bruto Facturado" DataField="ValorBruto" HeaderStyle-CssClass="text-right" ItemStyle-CssClass="text-right" FooterStyle-CssClass="text-right dineroNeg" />
+                                                <asp:BoundField HeaderText="Retención por Garantía" DataField="RetencionGarant" HeaderStyle-CssClass="text-right nosort" ItemStyle-CssClass="text-right" FooterStyle-CssClass="text-right dineroNeg" />
+                                                <asp:BoundField HeaderText="Devolución de Retenido" DataField="DevolucionRetGarant" HeaderStyle-CssClass="text-right nosort" ItemStyle-CssClass="text-right" FooterStyle-CssClass="text-right dineroNeg" />
+                                                <asp:BoundField HeaderText="Amortización de Anticipo" DataField="AmortizacionAnticipo" HeaderStyle-CssClass="text-right nosort" ItemStyle-CssClass="text-right" FooterStyle-CssClass="text-right dineroNeg" />
+                                                <asp:BoundField HeaderText="ITBMS Total" DataField="ItbmsTotal" HeaderStyle-CssClass="text-right nosort" ItemStyle-CssClass="text-right" FooterStyle-CssClass="text-right dineroNeg" />
+                                                <asp:BoundField HeaderText="Retención de ITBMS (50%)" DataField="RetencionItbms" HeaderStyle-CssClass="text-right nosort" ItemStyle-CssClass="text-right" FooterStyle-CssClass="text-right dineroNeg" />
+                                                <asp:BoundField HeaderText="Otros" DataField="Otros" HeaderStyle-CssClass="text-right nosort" ItemStyle-CssClass="text-right" FooterStyle-CssClass="text-right dineroNeg" />
+                                                <asp:BoundField HeaderText="Valor Neto Pagado" DataField="ValorNetoPag" HeaderStyle-CssClass="text-right nosort" ItemStyle-CssClass="text-right" FooterStyle-CssClass="text-right dineroNeg" />
+                                                <asp:BoundField HeaderText="Fecha Registra" DataField="FechaRegistro" ItemStyle-CssClass="" Visible="false" />
+                                                <asp:BoundField HeaderText="Usuario Registra" DataField="UsuarioRegistra" HeaderStyle-CssClass="nosort" ItemStyle-CssClass="" />
+                                                <asp:BoundField HeaderText="Fecha Modifica" DataField="FechaModifica" ItemStyle-CssClass="" Visible="false" />
+                                                <asp:BoundField HeaderText="Usuario Modifica" DataField="UsuarioModifica" ItemStyle-CssClass="" Visible="false" />
+
+                                                <%--<asp:BoundField HeaderText="SecFecPre" DataField="SecFecPre" ItemStyle-CssClass="" />--%>
+                                            </Columns>
+                                            <%--<EmptyDataTemplate>No existen registros.</EmptyDataTemplate>--%>
+                                            <%-- optional--%>
+                                            <FooterStyle CssClass="footerStyle" />
+                                            <%-- Mandatory--%>
+                                            <HeaderStyle CssClass="headerStyle" />
+                                            <%-- Mandatory--%>
+                                            <RowStyle CssClass="rowStyle" />
+                                        </asp:GridView>
+                                    </div>
+                                </div>
+                            </div>
+                        </asp:View>
+
+                        <asp:View ID="vSDSalPro" runat="server">
+                            <%-- Salto --%>
+                            <div class="row">
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                            </div>
+
+                            <%-- No Contrato & Fecha de Contrato --%>
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="row form-inline">
+                                        <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                            <label class="col-lg-5">Monto Inicial del Contrato de Obra (B/.): </label>
+                                            <div class="col-lg-7">
+                                                <asp:TextBox ID="txtMntIniContObraSld" CssClass="form-control text-right dinero" runat="server" ReadOnly="true" autocomplete="off"></asp:TextBox>
+                                            </div>
+                                        </div>
+                                        <div class="form-group col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                            <label class="col-lg-5">Monto Final del Proyecto (B/.): </label>
+                                            <div class="col-lg-7">
+                                                <asp:TextBox ID="txtMntFinProyecto" CssClass="form-control text-right dineroNeg ReadOnly-Select" runat="server" ReadOnly="true" autocomplete="off" ToolTip="Click para ir al compendio del proyecto"></asp:TextBox>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <%-- Salto --%>
+                            <div class="row">
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                            </div>
+
+                            <div class="row fa-border">
+                                <div class="col-lg-6 col-md-6 col-sm-6 borderRL" runat="server" id="dvSaldoFacturado">
+                                    <%-- Salto de Linea --%>
+                                    <div class="row">
+                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                                    </div>
+
+                                    <%-- Titulo --%>
+                                    <h4 class="text-center">
+                                        <strong>
+                                            <asp:Label ID="Label3" runat="server"
+                                                Style="text-align: center" Text="Total Facturado ">
+                                            </asp:Label>
+                                        </strong>
+                                    </h4>
+
+                                    <%-- Salto de Linea --%>
+                                    <div class="row">
+                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <div class="row form-inline">
+                                                <div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                    <label class="col-lg-6">Total Facturado Contrato de Obra: </label>
+                                                    <div class="col-lg-6">
+                                                        <asp:TextBox ID="txtTlFacObra" CssClass="form-control text-right dineroNeg" runat="server" autocomplete="off" ReadOnly="true" Style="text-align: right"></asp:TextBox>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <%-- Salto de Linea --%>
+                                    <div class="row">
+                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <div class="row form-inline">
+                                                <div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                    <label class="col-lg-6">Total Facturado Contrato de Inspección: </label>
+                                                    <div class="col-lg-6">
+                                                        <asp:TextBox ID="txtTlFacInspec" CssClass="form-control text-right dineroNeg" runat="server" autocomplete="off" ReadOnly="true" Style="text-align: right"></asp:TextBox>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <%-- Salto de Linea --%>
+                                    <div class="row">
+                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <div class="row form-inline">
+                                                <div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                    <label class="col-lg-6">Total Facturado Contrato Consultoría: </label>
+                                                    <div class="col-lg-6">
+                                                        <asp:TextBox ID="txtTlFacConsult" CssClass="form-control text-right dineroNeg" runat="server" autocomplete="off" ReadOnly="true" Style="text-align: right"></asp:TextBox>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <%-- Salto de Linea --%>
+                                    <div class="row">
+                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <div class="row form-inline">
+                                                <div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                    <label class="col-lg-6">Total Facturado Financiamiento / Intereses: </label>
+                                                    <div class="col-lg-6">
+                                                        <asp:TextBox ID="txtTlFacFi" CssClass="form-control text-right dineroNeg" runat="server" autocomplete="off" ReadOnly="true" Style="text-align: right"></asp:TextBox>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <%-- Salto de Linea --%>
+                                    <div class="row">
+                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <div class="row form-inline">
+                                                <div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                    <label class="col-lg-6">Otros Montos: </label>
+                                                    <div class="col-lg-6">
+                                                        <asp:TextBox ID="txtOtrosMontos" CssClass="form-control text-right dineroNeg" runat="server" autocomplete="off" ReadOnly="true" Style="text-align: right"></asp:TextBox>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <%-- Salto de Linea --%>
+                                    <div class="row">
+                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <div class="row form-inline">
+                                                <div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                    <label class="col-lg-6">Total Facturado: </label>
+                                                    <div class="col-lg-6">
+                                                        <asp:TextBox ID="txtTotalFacturado" CssClass="form-control text-right dineroNeg" runat="server" autocomplete="off" ReadOnly="true" Style="text-align: right"></asp:TextBox>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <%-- Salto de Linea --%>
+                                    <div class="row">
+                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6 col-md-6 col-sm-6 borderRL" runat="server" id="dvSaldoDelProyecto">
+
+                                    <%-- Salto de Linea --%>
+                                    <div class="row">
+                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                                    </div>
+
+                                    <h4 class="text-center">
+                                        <strong>
+                                            <asp:Label ID="Label4" runat="server"
+                                                Style="text-align: center" Text="Saldo del Proyecto ">
+                                            </asp:Label>
+                                        </strong>
+                                    </h4>
+
+                                    <%-- Titulo --%>
+
+                                    <%-- Salto de Linea --%>
+                                    <div class="row">
+                                        <div class="col-lg-4 col-md-12 col-sm-12 col-xs-1">&nbsp;</div>
+                                        <div class="col-lg-4 col-md-12 col-sm-12 col-xs-1">&nbsp;</div>
+                                        <div class="col-lg-4 col-md-12 col-sm-12 col-xs-1">&nbsp;</div>
+                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-1">&nbsp;</div>
+                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-1">&nbsp;</div>
+                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-1">&nbsp;</div>
+                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-1">&nbsp;</div>
+                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-1">&nbsp;</div>
+                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-1">&nbsp;</div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <div class="row form-inline">
+                                                <div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                    <label class="col-lg-6">Total Facturado: </label>
+                                                    <div class="col-lg-6">
+                                                        <asp:TextBox ID="txtTlFacturadoFI" CssClass="form-control text-right dineroNeg" runat="server" autocomplete="off" ReadOnly="true" Style="text-align: right"></asp:TextBox>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <%-- Salto de Linea --%>
+                                    <div class="row">
+                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-1">&nbsp;</div>
+                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-1">&nbsp;</div>
+                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-1">&nbsp;</div>
+                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-1">&nbsp;</div>
+                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-1">&nbsp;</div>
+                                    </div>
+
+
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <div class="row form-inline">
+                                                <div class="form-group col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                                    <label class="col-lg-6">Saldo del Proyecto: </label>
+                                                    <div class="col-lg-6">
+                                                        <asp:TextBox ID="txtSaldodelProyecto" CssClass="form-control text-right dineroNeg" runat="server" autocomplete="off" ReadOnly="true" Style="text-align: right"></asp:TextBox>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <%-- Salto de Linea --%>
+                                    <div class="row">
+                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-1">&nbsp;</div>
+                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-1">&nbsp;</div>
+                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-1">&nbsp;</div>
+                                        <div class="col-lg-4 col-md-4 col-sm-12 col-xs-1">&nbsp;</div>
+                                        <div class="col-lg-4 col-md-4 col-sm-12 col-xs-1">&nbsp;</div>
+                                        <div class="col-lg-4 col-md-4 col-sm-12 col-xs-1">&nbsp;</div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </asp:View>
+                    </asp:MultiView>
+
+                </asp:View>
+
+                <asp:View ID="vVisEva" runat="server">
+                    <asp:TextBox runat="server" CssClass="Oculto" ID="hd_DWDocID"></asp:TextBox>
+                    <asp:TextBox runat="server" CssClass="Oculto" ID="txtNumContrato_TabVisitas"></asp:TextBox>
+
+                    <%--<asp:TextBox ID="hdIdContrato" runat="server" CssClass="Oculto"></asp:TextBox>--%>
+                    <asp:TextBox runat="server" CssClass="Oculto" ID="hdIdVisita"></asp:TextBox>
+                    <asp:TextBox runat="server" CssClass="Oculto" ID="hdFechaVisitaAnterior"></asp:TextBox>
+                    <asp:TextBox runat="server" CssClass="Oculto" ID="hdIdEvaluacion"></asp:TextBox>
+                    <asp:TextBox runat="server" CssClass="Oculto" ID="hdIdFinRegistro"></asp:TextBox>
+                    <asp:TextBox runat="server" CssClass="Oculto" ID="hdFechaEvaluacionAnterior"></asp:TextBox>
+                    <asp:TextBox runat="server" CssClass="Oculto" ID="hdFechaFinRegAnterior"></asp:TextBox>
+
+                    <asp:TextBox ID="hd_ValorOrdena" runat="server" CssClass="Oculto"></asp:TextBox>
+                    <asp:TextBox ID="hd_SortDir" runat="server" CssClass="Oculto"></asp:TextBox>
+
+                    <ul id="TabVisEva" class="nav nav-tabs" role="tablist">
+                        <li class="nav-item" id="navtapVisita" runat="server">
+                            <asp:LinkButton ID="tapVisita" runat="server"><i class='fa fa-database'></i> Visita</asp:LinkButton>
+                        </li>
+                        <li class="nav-item " id="navtapEvaFin" runat="server">
+                            <asp:LinkButton ID="tapEvaFin" runat="server"><i class='fa fa-reorder'></i> Evaluación Final</asp:LinkButton>
+                        </li>
+                        <li class="nav-item " id="navtapFinReg" runat="server">
+                            <asp:LinkButton ID="tapFinReg" runat="server"><i class='fa fa-group'></i> Fin de Registro</asp:LinkButton>
+                        </li>
+                    </ul>
+
+                    <asp:MultiView ID="mvVisEva" runat="server">
+                        <asp:View ID="vVisita" runat="server">
+                            <div class="row">
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                            </div>
+
+                            <h5 class="text-center"><strong>
+                                <asp:Label ID="LblNoVisitas" runat="server" Visible="false" Style="text-align: center" Text="No hay visitas registradas."></asp:Label></strong></h5>
+
+                            <div class="row">
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                    <h4 class="text-center"><strong>
+                                        <asp:Label ID="lblTituloGridVisitas" runat="server"
+                                            Style="text-align: center" Text="Lista de visitas ingresadas"></asp:Label></strong></h4>
+
+                                    <asp:GridView ID="grvVistas" runat="server" CssClass="table table-responsive table-condensed"
+                                        AutoGenerateColumns="False" AllowPaging="True" PageSize="10" DataKeyNames="Secuencia, IdVisita, IdContrato, FechaVisita, Provincia, Comentarios,ComentariosCompleto, DocumentoAdjunto, Estado, 
+                                                UsuarioRegistra, FechaRegistro, UsuarioModifica, FechaModifica, Adjunto, Eliminar, Editar">
+
+                                        <Columns>
+                                            <asp:BoundField HeaderText="Sec." DataField="Secuencia" ItemStyle-CssClass="" HeaderStyle-CssClass="text-left" />
+                                            <asp:TemplateField>
+                                                <HeaderTemplate>
+                                                    <asp:LinkButton ID="linkSecuencia" ForeColor="White" CssClass="text-center" Text="Fecha de Visita." CommandName="OrdenaFecha" runat="server" ToolTip="Presione para Ordenar por Fecha de Visita"><i class='fa fa-sort' id="sortDefault" runat="server"></i></asp:LinkButton>
+                                                </HeaderTemplate>
+                                                <ItemTemplate>
+                                                    <asp:Label ID="grvLblSecuencia" runat="server" Text=''><%# Eval("FechaVisita")%></asp:Label>
+                                                </ItemTemplate>
+                                            </asp:TemplateField>
+                                            <asp:BoundField HeaderText="Provincia" DataField="Provincia" ItemStyle-CssClass="" HeaderStyle-CssClass="text-left" />
+                                            <asp:TemplateField HeaderText="Comentario">
+                                                <ItemTemplate>
+                                                    <asp:Label ID="grvLblComentario" runat="server" Text=""><%# Eval("Comentarios")%></asp:Label>
+                                                    <asp:LinkButton ID="grvLnkCometario" runat="server" Text="+" CommandName="Comentario" CommandArgument='<%# Container.DataItemIndex %>'></asp:LinkButton>
+                                                </ItemTemplate>
+                                            </asp:TemplateField>
+                                            <%--<asp:BoundField HeaderText="Comentario" DataField="Comentarios" ItemStyle-CssClass="" HeaderStyle-CssClass="text-left" />--%>
+                                            <asp:BoundField HeaderText="Usuario Registra" DataField="UsuarioRegistra" ItemStyle-CssClass="" HeaderStyle-CssClass="text-left" />
+                                            <asp:ButtonField DataTextField="Adjunto" HeaderText="Adjunto" CommandName="SelectAdju" ItemStyle-BorderStyle="Solid" ItemStyle-CssClass="" HeaderStyle-CssClass="text-left"></asp:ButtonField>
+                                            <%--<asp:ButtonField DataTextField="Editar" HeaderText="Acción" CommandName="SelectEdit" ItemStyle-BorderStyle="Solid" ItemStyle-CssClass="" HeaderStyle-CssClass="text-left"></asp:ButtonField>
+                                                <asp:ButtonField DataTextField="Eliminar" HeaderText="Acción" CommandName="SelectEliminar" ItemStyle-BorderStyle="Solid" ItemStyle-CssClass="ClassEliminar" HeaderStyle-CssClass="text-left"></asp:ButtonField>--%>
+                                        </Columns>
+
+                                    </asp:GridView>
+                                </div>
+
+                            </div>
+                        </asp:View>
+
+                        <asp:View ID="vEvaFin" runat="server">
+                            <div class="row">
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                            </div>
+
+                            <h5 class="text-center"><strong>
+                             <asp:Label ID="LblNoEvalVisiEval" runat="server" Visible="false" Style="text-align: center" Text="No hay evaluaciones ingresadas."></asp:Label></strong></h5>
+
+                            <div class="row">
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+
+                                    <h4 class="text-center"><strong>
+                                        <asp:Label ID="lblTituloGridEvaFinal" runat="server"
+                                            Style="text-align: center" Text="Lista de evaluaciones ingresadas"></asp:Label></strong></h4>
+
+                                    <asp:GridView ID="grvEvaFinal" runat="server" CssClass="table table-responsive table-condensed"
+                                        AutoGenerateColumns="False" AllowPaging="True" PageSize="10" DataKeyNames="Secuencia, IdEvaluacion, IdContrato, FechaEvaluacion, ResultadoFinal, ResultadoFinalCompleto, Estado, UsuarioRegistra,
+                                                FechaRegistro, UsuarioModifica, FechaModifica, Eliminar, Editar">
+
+                                        <Columns>
+                                            <asp:BoundField HeaderText="Sec." DataField="Secuencia" ItemStyle-CssClass="" HeaderStyle-CssClass="text-left" />
+                                            <asp:TemplateField>
+                                                <HeaderTemplate>
+                                                    <asp:LinkButton ID="linkSecuencia" ForeColor="White" CssClass="text-center" Text="Fecha de Evaluación" CommandName="OrdenaFecha" runat="server" ToolTip="Presione para Ordenar por Fecha de Evaluación"><i class='fa fa-sort' id="sortDefault" runat="server"></i></asp:LinkButton>
+                                                </HeaderTemplate>
+                                                <ItemTemplate>
+                                                    <asp:Label ID="grvLblSecuencia" runat="server" Text=''><%# Eval("FechaEvaluacion")%></asp:Label>
+                                                </ItemTemplate>
+                                            </asp:TemplateField>
+                                            <asp:TemplateField HeaderText="Resultado Evaluación">
+                                                <ItemTemplate>
+                                                    <asp:Label ID="grvLblComentario" runat="server" Text=""><%# Eval("ResultadoFinal")%></asp:Label>
+                                                    <asp:LinkButton ID="grvLnkCometario" runat="server" Text="+" CommandName="Comentario" CommandArgument='<%# Container.DataItemIndex %>'></asp:LinkButton>
+                                                </ItemTemplate>
+                                            </asp:TemplateField>
+                                            <%--<asp:BoundField HeaderText="Resultado Evaluación" DataField="ResultadoFinal" ItemStyle-CssClass="" HeaderStyle-CssClass="text-left" />--%>
+                                            <asp:BoundField HeaderText="Usuario Registra" DataField="UsuarioRegistra" ItemStyle-CssClass="" HeaderStyle-CssClass="text-left" />
+                                            <%--<asp:ButtonField DataTextField="Editar" HeaderText="Acción" CommandName="SelectEdit" ItemStyle-BorderStyle="Solid" ItemStyle-CssClass="" HeaderStyle-CssClass="text-left"></asp:ButtonField>
+                                                <asp:ButtonField DataTextField="Eliminar" HeaderText="Acción" CommandName="SelectEliminar" ItemStyle-BorderStyle="Solid" ItemStyle-CssClass="ClassEliminar" HeaderStyle-CssClass="text-left"></asp:ButtonField>--%>
+                                        </Columns>
+
+                                    </asp:GridView>
+
+                                </div>
+
+                            </div>
+                        </asp:View>
+
+                        <asp:View ID="vFinReg" runat="server">
+                            <div class="row">
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+                            </div>
+
+                             <h5 class="text-center"><strong>
+                                <asp:Label ID="LblDatFinVisiEval" runat="server" Visible="false" Style="text-align: center" Text="No hay datos de fin de registro ingresados."></asp:Label></strong></h5>
+
+                            <div class="row">
+                                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                    <h4 class="text-center"><strong>
+                                        <asp:Label ID="lblTituloGridFinReg" runat="server"
+                                            Style="text-align: center" Text="Lista de envíos a supervisión ingresadas"></asp:Label></strong></h4>
+
+                                    <asp:GridView ID="grvFinRegistro" runat="server" CssClass="table table-responsive table-condensed"
+                                        AutoGenerateColumns="False" AllowPaging="True" PageSize="10" DataKeyNames="Secuencia, IdFinRegistro, IdContrato, FechaEnvio, Observacion, ObservacionCompleto, Estado,
+                                                UsuarioRegistra, FechaRegistro, UsuarioModifica, FechaModifica, Eliminar, Editar">
+
+                                        <Columns>
+                                            <asp:BoundField HeaderText="Sec." DataField="Secuencia" ItemStyle-CssClass="" HeaderStyle-CssClass="text-left" />
+
+                                            <asp:TemplateField>
+                                                <HeaderTemplate>
+                                                    <asp:LinkButton ID="linkSecuencia" ForeColor="White" CssClass="text-center" Text="Fecha de Envío" CommandName="OrdenaFecha" runat="server" ToolTip="Presione para Ordenar por Fecha de Envío"><i class='fa fa-sort' id="sortDefault" runat="server"></i></asp:LinkButton>
+                                                </HeaderTemplate>
+                                                <ItemTemplate>
+                                                    <asp:Label ID="grvLblSecuencia" runat="server" Text=''><%# Eval("FechaEnvio")%></asp:Label>
+                                                </ItemTemplate>
+                                            </asp:TemplateField>
+                                            <asp:TemplateField HeaderText="Observación">
+                                                <ItemTemplate>
+                                                    <asp:Label ID="grvLblComentario" runat="server" Text=""><%# Eval("Observacion")%></asp:Label>
+                                                    <asp:LinkButton ID="grvLnkCometario" runat="server" Text="+" CommandName="Comentario" CommandArgument='<%# Container.DataItemIndex %>'></asp:LinkButton>
+                                                </ItemTemplate>
+                                            </asp:TemplateField>
+                                            <%--<asp:BoundField HeaderText="Observación" DataField="Observacion" ItemStyle-CssClass="" HeaderStyle-CssClass="text-left" />--%>
+                                            <asp:BoundField HeaderText="Usuario Registra" DataField="UsuarioRegistra" ItemStyle-CssClass="" HeaderStyle-CssClass="text-left" />
+                                            <%--<asp:ButtonField DataTextField="Editar" HeaderText="Acción" CommandName="SelectEdit" ItemStyle-BorderStyle="Solid" ItemStyle-CssClass="" HeaderStyle-CssClass="text-left"></asp:ButtonField>
+                                                <asp:ButtonField DataTextField="Eliminar" HeaderText="Acción" CommandName="SelectEliminar" ItemStyle-BorderStyle="Solid" ItemStyle-CssClass="ClassEliminar" HeaderStyle-CssClass="text-left"></asp:ButtonField>--%>
+                                        </Columns>
+
+                                    </asp:GridView>
+
+                                </div>
+                            </div>
+                        </asp:View>
+                    </asp:MultiView>
+                </asp:View>
+
+            </asp:MultiView>
+
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">&nbsp;</div>
+            </div>
+        </div>
+    </div>
+</asp:Content>
+
+<asp:Content ID="Content3" ContentPlaceHolderID="ContentPlaceHolderscripts" runat="server">
+    <script>
+        $(document).ready(function () {
+            autoComplete_NumeroContratoAreaEntidad("txtNumCon", "HfNumCon", "ddlArea", "ddlEntidad", "ddlEstado", "1");
+
+            //var Table = ClsDt.DtClsOrderDep("table_endoso", "0", false, 6, 7);
+            var Table1 = ClsDt.DtOrderDep2("grvEndo", 6, 7, 1);
+
+            Funciones.CamposEspeciales.CrearContadorCaracter("txtDesc", 1000);
+            Funciones.CamposEspeciales.CrearContadorCaracter("txtComent", 1000);
+            Funciones.CamposEspeciales.CrearContadorCaracter("txtObsRef", 1000);
+            Funciones2.CampoMoneyParametrosLb("dinero");
+            Funciones2.CampoMoneyPermiteNegativo("dineroNeg");
+            Funciones.CamposEspeciales.CreaCampoMoney("txtTotalPorce");
+            Funciones.CamposEspeciales.CreaCampoMoney("txtMontI");
+            Funciones.CamposEspeciales.CreaCampoMoney("txtEstDis");
+            Funciones.CamposEspeciales.CreaCampoMoney("txtCostVar");
+            Funciones.CamposEspeciales.CreaCampoMoney("txtEquiSum");
+            Funciones.CamposEspeciales.CreaCampoMoney("txtMante");
+            Funciones.CamposEspeciales.CreaCampoMoney("txtConst");
+            Funciones.CamposEspeciales.CreaCampoMoney("txtFinan");
+            Funciones.CamposEspeciales.CreaCampoMoney("txtTotalCostDir");
+            Funciones.CamposEspeciales.CreaCampoMoney("txtTotalCostInd");
+            Funciones.CamposEspeciales.CreaCampoMoney("txtMonIEmpAdj");
+            Funciones.CamposEspeciales.CreaCampoMoney("txtMontIFia");
+            Funciones.CamposEspeciales.CreaCampoMoney("txtMontIEst");
+            Funciones.CamposEspeciales.CreaCampoMoney("txtMonIEmpAdj");
+            Funciones.CamposEspeciales.CreaCampoMoney("txtMntIniCO");
+            Funciones.CamposEspeciales.CreaCampoMoney("txtMntIniCA");
+            Funciones.CamposEspeciales.CreaCampoMoney("txtMntFCO");
+            Funciones.CamposEspeciales.CreaCampoMoney("txtMntAntCO");
+            Funciones.CamposEspeciales.CreaCampoMoney("txtMntAntCA");
+            Funciones.CamposEspeciales.CreaCampoMoney("txtSldCO");
+            Funciones.CamposEspeciales.CreaCampoMoney("txtSldCA");
+            Funciones.CamposEspeciales.CreaCampoMoney("txtSldAntCO");
+            Funciones.CamposEspeciales.CreaCampoMoney("txtSldAntCA");
+            Funciones.CamposEspeciales.CreaCampoMoney("txtMntFConAdCO");
+            Funciones.CamposEspeciales.CreaCampoMoney("txtMntFConAdCA");
+            Funciones.CamposEspeciales.CreaCampoMoney("txtSldRetxPgCO");
+            Funciones.CamposEspeciales.CreaCampoMoney("txtSldRetxPgCA");
+            Funciones.CamposEspeciales.CreaCampoMoney("txtMntFinProyecto");
+            //Funciones.CamposEspeciales.CreaCampoMoney("txtSaldodelProyecto");
+            Funciones.CamposEspeciales.CreaCampoMoney("txtMntIniContObraSld");
+            Funciones.CamposEspeciales.CreaCampoMoney("txtMntFinProyecto");
+            Funciones.CamposEspeciales.CreaCampoMoney("txtTlFacObra");
+            Funciones.CamposEspeciales.CreaCampoMoney("txtTlFacInspec");
+            Funciones.CamposEspeciales.CreaCampoMoney("txtTlFacConsult");
+            Funciones.CamposEspeciales.CreaCampoMoney("txtTlFacFi");
+            Funciones.CamposEspeciales.CreaCampoMoney("txtOtrosMontos");
+            Funciones.CamposEspeciales.CreaCampoMoney("txtTotalFacturado");
+            Funciones.CamposEspeciales.CreaCampoMoney("txtTlFacturadoFI");
+            Funciones.CamposEspeciales.CreaCampoMoney("txtSaldodelProyecto");
+            Funciones.CamposEspeciales.CreaCampoMoney("txtMntFCA");
+
+            //Declaraciones para Consulta del Saldo del Proyecto
+            {
+                var txtMntFinProyecto = Funciones2.ObtenerObjeto("txtMntFinProyecto");
+
+                txtMntFinProyecto.on("click", function (key) {
+                    var IdContrato = (Funciones.Utilidades.GetObjectCampo('TxtIdContrato').val());
+                    var url = "WFResumenProyecto.aspx?param=" + IdContrato + "&Arg=D"
+                    Funciones.Utilidades.OpenWindowFull(url);
+                    //window.open(url, '_blank').focus();
+                });
+            }
+
+
+        });
+
+    </script>
+</asp:Content>

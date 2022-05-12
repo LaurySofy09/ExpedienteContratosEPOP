@@ -1,0 +1,2472 @@
+Public Class WFExpedienteElectronicoProyecto
+    Inherits System.Web.UI.Page
+    Dim IntAD As New InterfaseAD
+    Dim IntJF As New InterfaseJF
+    Dim IntAB As New InterfaseAB
+    Dim IntTC As New InterfaseTC
+
+    Dim lsIdentificador As String = ""
+    Public notifyModal As String = ""
+    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load
+        Dim lsIdentificador As String = Funciones.GetUsuarioIdentificador
+        Dim activaDW As String = ""
+        Dim dt As New DataTable
+
+        dt = IntTC.ConsultarParametro(lsIdentificador, "ActDW")
+
+        If dt.Rows.Count > 0 Then
+            activaDW = RTrim(dt(0)("ValorText").ToString)
+        End If
+
+        Session("activoDW") = activaDW
+
+        If Not IsPostBack Then
+            vPrimera()
+
+            Dim Param As String = Request.Params.Get("Param")
+            Dim Arg As String = Request.Params.Get("Arg")
+
+            If Param <> "" Then
+                If Arg = "D" Then 'viene de desembolsos
+                    'CargarContrato(Param)
+                    'tapComPro_Click(Nothing, Nothing)
+                ElseIf Arg = "S" Then 'viene de supervisiones
+                    mvExpediente.ActiveViewIndex = 0
+                    mvContrato.ActiveViewIndex = 1
+                    CargarContrato(Param)
+                    Dim lsRol As String = Funciones.GetUsuarioIdRol
+                    Session("rolHistorial") = lsRol
+                End If
+            End If
+        End If
+    End Sub
+
+    Private Sub vPrimera()
+
+        mvExpediente.ActiveViewIndex = 0
+        mvContrato.ActiveViewIndex = 0
+
+        navtapContrato.Attributes.Add("class", "active")
+        navtapDuracionCostI.Attributes.Remove("class")
+        navtapEmpresaAdj.Attributes.Remove("class")
+        navtapFianzas.Attributes.Remove("class")
+        navtapSaldosDesem.Attributes.Remove("class")
+        navtapEstatus.Attributes.Remove("class")
+        navtapActas.Attributes.Remove("class")
+        navtapVisitaEval.Attributes.Remove("class")
+        navtapHisEle.Attributes.Remove("class")
+
+        If TxtIdContrato.Text = "" Then
+            navtapDuracionCostI.Attributes.Add("class", "nav-item disabled")
+            navtapEmpresaAdj.Attributes.Add("class", "nav-item disabled")
+            navtapFianzas.Attributes.Add("class", "nav-item disabled")
+            navtapSaldosDesem.Attributes.Add("class", "nav-item disabled")
+            navtapEstatus.Attributes.Add("class", "nav-item disabled")
+            navtapActas.Attributes.Add("class", "nav-item disabled")
+            navtapVisitaEval.Attributes.Add("class", "nav-item disabled")
+            navtapHisEle.Attributes.Add("class", "nav-item disabled")
+            tapDuracionCostI.Enabled = False
+            tapEmpresaAdj.Enabled = False
+            tapFianzas.Enabled = False
+            tapSaldosDesem.Enabled = False
+            tapEstatus.Enabled = False
+            tapActas.Enabled = False
+            tapVisitaEval.Enabled = False
+            tapHisEle.Enabled = False
+        Else
+            tapDuracionCostI.Enabled = True
+            tapEmpresaAdj.Enabled = True
+            tapFianzas.Enabled = True
+            tapSaldosDesem.Enabled = True
+            tapEstatus.Enabled = True
+            tapActas.Enabled = True
+            tapVisitaEval.Enabled = True
+            tapHisEle.Enabled = True
+        End If
+
+        dvNumConM.Visible = False
+
+        If TxtIdContrato.Text = "" Then
+            CargaArea()
+            CargaAuditor()
+            CargaEstatus()
+            CargaEstElc()
+        End If
+
+    End Sub
+
+    Private Sub btnCancelar_Click(sender As Object, e As EventArgs) Handles btnCancelar.Click
+        Cancelar()
+    End Sub
+
+    Private Sub Cancelar()
+        mvContrato.ActiveViewIndex = 0
+        TxtIdContrato.Text = ""
+        navtapContrato.Attributes.Add("class", "active")
+        navtapHisEle.Attributes.Remove("class")
+        navtapDuracionCostI.Attributes.Remove("class")
+        navtapEmpresaAdj.Attributes.Remove("class")
+        navtapFianzas.Attributes.Remove("class")
+        navtapSaldosDesem.Attributes.Remove("class")
+        navtapEstatus.Attributes.Remove("class")
+        navtapActas.Attributes.Remove("class")
+        navtapVisitaEval.Attributes.Remove("class")
+        navtapDuracionCostI.Attributes.Add("class", "nav-item disabled")
+        navtapEmpresaAdj.Attributes.Add("class", "nav-item disabled")
+        navtapFianzas.Attributes.Add("class", "nav-item disabled")
+        navtapSaldosDesem.Attributes.Add("class", "nav-item disabled")
+        navtapEstatus.Attributes.Add("class", "nav-item disabled")
+        navtapActas.Attributes.Add("class", "nav-item disabled")
+        navtapVisitaEval.Attributes.Add("class", "nav-item disabled")
+        navtapHisEle.Attributes.Add("class", "nav-item disabled")
+        tapDuracionCostI.Enabled = False
+        tapEmpresaAdj.Enabled = False
+        tapFianzas.Enabled = False
+        tapSaldosDesem.Enabled = False
+        tapEstatus.Enabled = False
+        tapActas.Enabled = False
+        tapVisitaEval.Enabled = False
+        tapHisEle.Enabled = False
+
+        lblTituloListaEndo.Visible = False
+        lblNoEndo.Visible = False
+        grvEndo.Visible = False
+        gvActas.Visible = False
+        LblNoTipoActas.Visible = False
+        lblNoFianzas.Visible = False
+        gvFianzas.Visible = False
+        lblNoPropo.Visible = False
+
+    End Sub
+
+#Region "Contrato"
+    Private Sub tapContrato_Click(sender As Object, e As EventArgs) Handles tapContrato.Click
+        If mvExpediente.ActiveViewIndex = 0 And mvContrato.ActiveViewIndex = 0 Then
+            vPrimera()
+        Else
+            mvExpediente.ActiveViewIndex = 0
+            mvContrato.ActiveViewIndex = 1
+
+            AsignarClaseActiva(navtapContrato)
+        End If
+    End Sub
+
+    Private Sub CargaArea()
+        Dim Areas As New DataTable
+        Areas = IntAD.ListarAreas(lsIdentificador)
+
+        ddlArea.Items.Clear()
+        ddlEntidad.Items.Clear()
+
+        Dim Pred As ListItem = New ListItem
+        Pred.Text = "--Seleccione--"
+        Pred.Value = -1
+        Pred.Attributes.Add("Class", "Oculto")
+
+        ddlArea.Items.Add(Pred)
+        ddlEntidad.Items.Add((New ListItem("", "-1")))
+
+        If Areas.Rows.Count > 0 Then
+            For Each r As DataRow In Areas.Rows
+                ddlArea.Items.Add(New ListItem(r.Item("Descripcion"), r.Item("IdArea")))
+            Next
+        End If
+    End Sub
+
+    Private Sub CargaEntidad(ByVal IdArea As String)
+        Dim Entidades As New DataTable
+        Entidades = IntAD.ListarEntidad(ddlArea.SelectedValue, lsIdentificador)
+
+        ddlEntidad.Items.Clear()
+
+        Dim Pred As ListItem = New ListItem
+        Pred.Text = "--Seleccione--"
+        Pred.Value = -1
+        Pred.Attributes.Add("Class", "Oculto")
+
+        ddlEntidad.Items.Add(Pred)
+
+        If Entidades.Rows.Count > 0 Then
+            For Each r As DataRow In Entidades.Rows
+                ddlEntidad.Items.Add(New ListItem(r.Item("Descripcion"), r.Item("IdEntidad")))
+            Next
+        End If
+    End Sub
+
+    Private Sub CargaAuditor()
+        Dim Auditor As New DataTable
+        Auditor = IntAD.ListarAuditores(lsIdentificador)
+
+        ddlAuditor.Items.Clear()
+
+        Dim Pred As ListItem = New ListItem
+        Pred.Text = "--Todos--"
+        Pred.Value = ""
+
+        ddlAuditor.Items.Add(Pred)
+        If Auditor.Rows.Count > 0 Then
+            For Each r As DataRow In Auditor.Rows
+                ddlAuditor.Items.Add(New ListItem(r.Item("NombreUsuario"), r.Item("IdUsuario")))
+            Next
+        End If
+    End Sub
+
+    Private Sub CargaEstatus()
+        Dim Estatus As New DataTable
+        Estatus = IntAD.ListarEstatus(lsIdentificador)
+
+        ddlEstatus.Items.Clear()
+
+        Dim Pred As ListItem = New ListItem
+        Pred.Text = "--Todos--"
+        Pred.Value = ""
+
+        ddlEstatus.Items.Add(Pred)
+        If Estatus.Rows.Count > 0 Then
+            For Each r As DataRow In Estatus.Rows
+                ddlEstatus.Items.Add(New ListItem(r.Item("Descripcion"), r.Item("IdTipoEst")))
+            Next
+        End If
+    End Sub
+
+    Private Sub ddlArea_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ddlArea.SelectedIndexChanged
+        ddlArea.ToolTip = ddlArea.SelectedItem.ToString
+        CargaEntidad(ddlArea.SelectedValue)
+        ddlArea.Items.Remove(New ListItem("--Seleccione--", "-1"))
+    End Sub
+
+    Private Sub btnBuscar_Click(sender As Object, e As EventArgs) Handles btnBuscar.Click
+        If ValidarBuscarContrato() Then
+            CargaContratos()
+        Else
+            Funciones.ModalNotificacion("VALID18")
+        End If
+    End Sub
+
+    Private Function ValidarBuscarContrato()
+        If ddlArea.SelectedValue <> -1 Then
+            Return True
+        End If
+
+        If ddlEntidad.SelectedValue <> -1 Then
+            Return True
+        End If
+
+        If Not String.IsNullOrWhiteSpace(txtNumCon.Text) Then
+            Return True
+        End If
+
+        If Not String.IsNullOrWhiteSpace(txtFecConDes.Text) Then
+            Return True
+        End If
+
+        If Not String.IsNullOrWhiteSpace(txtFecConHas.Text) Then
+            Return True
+        End If
+
+        If ddlEstEle.SelectedValue <> "" Then
+            Return True
+        End If
+
+        If ddlAuditor.SelectedValue <> "" Then
+            Return True
+        End If
+
+        If ddlEstatus.SelectedValue <> "" Then
+            Return True
+        End If
+
+        Return False
+    End Function
+
+    Private Sub CargaContratos()
+        Dim Contratos As New DataTable
+        Dim contador As Integer = 0
+        Contratos = IntAD.ListarContrato2(ddlArea.SelectedValue, ddlEntidad.SelectedValue, "", "", txtNumCon.Text, "", "", lsIdentificador, ddlEstado.SelectedValue, txtFecConDes.Text, txtFecConHas.Text, ddlEstEle.SelectedValue, ddlAuditor.SelectedValue, ddlEstatus.SelectedValue)
+
+        If Contratos.Rows.Count > 0 Then
+            gvContrato.Visible = True
+            LblGvContrato.Visible = True
+            LblGvContrato.Text = String.Format("Lista de Contratos: {0} Registros", Contratos.Rows.Count)
+            gvContrato.DataSource = Contratos
+            gvContrato.DataBind()
+            gvContrato.HeaderRow.TableSection = TableRowSection.TableHeader
+            For Each row In gvContrato.Rows
+                row.Cells(3).ToolTip = "Presione para ver data de contrato"
+                contador = contador + 1
+            Next
+        Else
+            Funciones.ModalNotificacion("MSG4")
+            gvContrato.Visible = False
+            LblGvContrato.Visible = False
+        End If
+    End Sub
+
+    Private Sub gvContrato_PageIndexChanging(sender As Object, e As GridViewPageEventArgs) Handles gvContrato.PageIndexChanging
+        gvContrato.PageIndex = e.NewPageIndex
+        CargaContratos()
+    End Sub
+
+    Private Sub btnLimpiar_Click(sender As Object, e As EventArgs) Handles btnLimpiar.Click
+        ddlArea.Items.Clear()
+        ddlEntidad.Items.Clear()
+        txtNumCon.Text = ""
+        ddlEstado.SelectedValue = "A"
+        txtFecConDes.Text = ""
+        txtFecConHas.Text = ""
+
+        gvContrato.Visible = False
+        LblGvContrato.Visible = False
+
+        CargaArea()
+        CargaAuditor()
+        CargaEstatus()
+        CargaEstElc()
+
+        TxtIdContrato.Text = ""
+        tapContrato_Click(Nothing, Nothing)
+    End Sub
+
+    Private Sub gvContrato_RowCommand(sender As Object, e As GridViewCommandEventArgs) Handles gvContrato.RowCommand
+        If e.CommandName = "Select" Then
+            Dim IdContrato As String = e.CommandArgument.ToString
+            TxtIdContrato.Text = IdContrato
+            mvContrato.ActiveViewIndex = 1
+            CargarContrato(IdContrato)
+        End If
+    End Sub
+
+    Private Sub gvContrato_RowDataBound(sender As Object, e As GridViewRowEventArgs) Handles gvContrato.RowDataBound
+        If e.Row.RowType = DataControlRowType.DataRow Then
+            Dim index As Integer = e.Row.RowIndex
+            Dim Id As Integer = gvContrato.DataKeys(index)("Id")
+            Dim NumActoPub As String = gvContrato.DataKeys(index)("NumActoPub")
+            Dim NumContrato As String = gvContrato.DataKeys(index)("NumContrato")
+            Dim FechaContato As String = gvContrato.DataKeys(index)("FechaContrato")
+            Dim FechaRefrendo As String = gvContrato.DataKeys(index)("FechaRefrendo")
+            Dim Entidad As String = gvContrato.DataKeys(index)("Entidad")
+            Dim EstadoElectronico As String = gvContrato.DataKeys(index)("EstEle")
+            Dim Estado As String = gvContrato.DataKeys(index)("Estado")
+            Dim Estatus As String = gvContrato.DataKeys(index)("Estatus")
+            Dim UsuarioRegistra As String = gvContrato.DataKeys(index)("UsuarioRegistra")
+            Dim FechaRegistro As String = gvContrato.DataKeys(index)("FechaRegistro")
+            Dim UsuarioModifica As String = gvContrato.DataKeys(index)("UsuarioModifica")
+            Dim FechaModifica As String = gvContrato.DataKeys(index)("FechaModifica")
+            Dim SupervisorCrea As String = gvContrato.DataKeys(index)("SupervisorCrea")
+            Dim SupervisorFechaCrea As String = gvContrato.DataKeys(index)("SupervisorFechaCrea")
+            Dim SupervisorModifica As String = gvContrato.DataKeys(index)("SupervisorModifica")
+            Dim SupervisorFechaModifica As String = gvContrato.DataKeys(index)("SupervisorFechaModifica")
+
+            Dim LblId As Label = e.Row.FindControl("grvLblSec")
+            Dim LblNumActPub As Label = e.Row.FindControl("grvLblNumActPub")
+            Dim LblFecCont As Label = e.Row.FindControl("grvLblFecCon")
+            Dim LblFecRefr As Label = e.Row.FindControl("grvLblFecRef")
+            Dim LblEntidad As Label = e.Row.FindControl("grvLblEntidad")
+            Dim LblEstadoElectronico As Label = e.Row.FindControl("grvLblEstEle")
+            Dim LblEstado As Label = e.Row.FindControl("grvLblEstado")
+            Dim LblEstatus As Label = e.Row.FindControl("grvLblEstPro")
+            Dim lblUsuarioRegistra As Label = e.Row.FindControl("grvLblAuditor")
+            Dim lblSupervisorCrea As Label = e.Row.FindControl("grvLblSupervisor")
+
+            LblId.Text = Id
+            LblNumActPub.Text = NumActoPub
+            LblFecCont.Text = FechaContato
+            LblFecRefr.Text = FechaRefrendo
+            LblEntidad.Text = Entidad
+            LblEstadoElectronico.Text = EstadoElectronico
+            LblEstado.Text = Estado
+            LblEstatus.Text = Estatus
+            lblUsuarioRegistra.Text = UsuarioRegistra
+            lblSupervisorCrea.Text = SupervisorCrea
+
+            lblUsuarioRegistra.ToolTip = "Usuario Registra: " & UsuarioRegistra & Environment.NewLine &
+                                        "Fecha Registra: " & FechaRegistro & Environment.NewLine &
+                                        "Usuario Modifica: " & UsuarioModifica & Environment.NewLine &
+                                        "Fecha Modifica: " & FechaModifica
+
+            lblSupervisorCrea.ToolTip = "Supervisor Crea: " & SupervisorCrea & Environment.NewLine &
+                                    "Fecha Crea: " & SupervisorFechaCrea & Environment.NewLine &
+                                    "Supervisor Modifica: " & SupervisorModifica & Environment.NewLine &
+                                    "Fecha Modifica: " & SupervisorFechaModifica
+
+        ElseIf (e.Row.RowType = DataControlRowType.Footer) And (gvContrato.PageIndex = gvContrato.PageCount - 1) Then
+            Dim dt As New DataTable
+            dt = gvContrato.DataSource
+        End If
+    End Sub
+
+    Private Sub CargarContrato(ByVal IdContrato As String)
+        Dim Consultar As New DataTable
+        Consultar = IntAD.ConsultarContratoEPOP(IdContrato, lsIdentificador)
+
+        If Consultar.Rows.Count > 0 Then
+            TxtIdContrato.Text = IdContrato
+            txtNumConM.Text = Consultar.Rows(0).Item("NumContrato")
+            txtArea.Text = Consultar.Rows(0).Item("Area")
+            txtEntidad.Text = Consultar.Rows(0).Item("Entidad")
+            txtActPub.Text = Consultar.Rows(0).Item("NumActoPub")
+            txtFecActPub.Text = Consultar.Rows(0).Item("FecActoPub")
+            txtRengActPub.Text = Consultar.Rows(0).Item("Renglon")
+            txtNumCobe.Text = Consultar.Rows(0).Item("COBE")
+            txtProv.Text = Consultar.Rows(0).Item("Provincia")
+            txtScafid.Text = Consultar.Rows(0).Item("SCAFID")
+            txtDesc.Text = Consultar.Rows(0).Item("Descripcion")
+            txtNoCon.Text = txtNumConM.Text
+            txtFecConM.Text = Consultar.Rows(0).Item("FecContrato")
+            txtMontI.Text = Consultar.Rows(0).Item("MontoInicial")
+            txtDuracionI.Text = Consultar.Rows(0).Item("Duracion")
+            txtFechaIOP.Text = Consultar.Rows(0).Item("FecOrdPro")
+            txtEstDis.Text = Consultar.Rows(0).Item("MontoEstudio")
+            txtPorceEstDis.Text = Consultar.Rows(0).Item("PorcentajeEstYDisenio")
+            txtCostVar.Text = Consultar.Rows(0).Item("CostosVarios")
+            txtPorceCostVar.Text = Consultar.Rows(0).Item("PorcentajeCosVar")
+            txtEquiSum.Text = Consultar.Rows(0).Item("MontoEquipo")
+            txtPorceEquiSum.Text = Consultar.Rows(0).Item("PorcentajeEquipoSuministro")
+            txtMante.Text = Consultar.Rows(0).Item("Mantenimiento")
+            txtPorceMante.Text = Consultar.Rows(0).Item("PorcentajeMan")
+            txtConst.Text = Consultar.Rows(0).Item("MontoConstruccion")
+            txtPorceConst.Text = Consultar.Rows(0).Item("PorcentajeContruccion")
+            txtFinan.Text = Consultar.Rows(0).Item("Financiamiento")
+            txtPorceFinan.Text = Consultar.Rows(0).Item("PorcentajeFin")
+            txtTotalCostDir.Text = Consultar.Rows(0).Item("TotalDirecto")
+            txtTotalCostInd.Text = Consultar.Rows(0).Item("TotalIndirecto")
+            txtTotalPorce.Text = Consultar.Rows(0).Item("PorcentajeTotal")
+            txtComent.Text = Consultar.Rows(0).Item("ComentarioCostos")
+            txtActoPubEmpAdj.Text = Consultar.Rows(0).Item("IdActoPub")
+            txtIdEmpresa.Text = Consultar.Rows(0).Item("IdEmpresaAdjudicada")
+            txtIdRenglon.Text = Consultar.Rows(0).Item("IdRenglonActo")
+            txtObsRef.Text = Consultar.Rows(0).Item("ObservacionRefrendo")
+            txtFechaRefEmpAdj.Text = Consultar.Rows(0).Item("FecRefrendo")
+
+            Dim ContrPrev As String = Consultar.Rows(0).Item("ControlPrevio")
+            If ContrPrev = "Y" Then
+                ChkControlPrev.Checked = True
+            Else
+                ChkControlPrev.Checked = False
+            End If
+
+            txtMontIEst.Text = txtMontI.Text
+            txtMontIFia.Text = txtMontI.Text
+            txtMonIEmpAdj.Text = txtMontI.Text
+            txtAreaActas.Text = txtArea.Text
+            txtEntidadActas.Text = txtEntidad.Text
+            txtNoConActas.Text = txtNumConM.Text
+            txtNoContHisEle.Text = txtNumConM.Text
+            txtFecContHisEle.Text = txtFecConM.Text
+
+            navtapDuracionCostI.Attributes.Remove("class")
+            navtapEmpresaAdj.Attributes.Remove("class")
+            navtapFianzas.Attributes.Remove("class")
+            navtapSaldosDesem.Attributes.Remove("class")
+            navtapEstatus.Attributes.Remove("class")
+            navtapActas.Attributes.Remove("class")
+            navtapVisitaEval.Attributes.Remove("class")
+            navtapHisEle.Attributes.Remove("class")
+            tapDuracionCostI.Enabled = True
+            tapEmpresaAdj.Enabled = True
+            tapFianzas.Enabled = True
+            tapSaldosDesem.Enabled = True
+            tapEstatus.Enabled = True
+            tapActas.Enabled = True
+            tapVisitaEval.Enabled = True
+            tapHisEle.Enabled = True
+
+            Session("IDcontrato") = IdContrato
+            Session("numContrato") = Consultar.Rows(0).Item("NumContrato")
+            Session("fechaContrato") = Consultar.Rows(0).Item("FecContrato")
+            Session("flag_M_T") = 1
+            Session("rolHistorial") = 2
+        Else
+            TxtIdContrato.Text = ""
+            Funciones.ModalNotificacion("MSG4")
+        End If
+    End Sub
+#End Region
+
+#Region "Estatus"
+    Private Sub tapEstatus_Click(sender As Object, e As EventArgs) Handles tapEstatus.Click
+        dvNumConM.Visible = True
+        mvExpediente.ActiveViewIndex = 3
+
+        IrAEstatusObra()
+        AsignarClaseActiva(navtapEstatus)
+
+    End Sub
+
+    Private Sub IrAEstatusObra()
+        'lblNombreFormulario.Text = "Estatus Actual de la Obra"
+        txtSortDirOpt.Text = "-3"
+        txtSortDirOptAnt.Text = "-2"
+        txtCargaEditaReg.Text = "1"
+        txtValorOrdena.Text = "Sec"
+        txtSortDirOpt.Text = "3" ' validar
+        txtSortDir.Text = "ASC"
+        CargarEstatusObra(TxtIdContrato.Text)
+    End Sub
+
+    Private Sub CargarEstatusObra(ByVal IdContrato As String)
+
+        Dim EstatusObraxCont = New DataTable()
+        ViewState("EstatusObraxCont") = EstatusObraxCont
+
+        EstatusObraxCont = IntAD.ListarEstatusObra(IdContrato, lsIdentificador)
+        If EstatusObraxCont.Rows.Count > 0 Then
+            dvListaEstatusObra.Visible = True
+            'GridSortDir()
+            'OrdenarGridEstatusObra()
+            ''----------------------------Datos para Ordenamiento----------------------------''
+            If txtSortDir.Text = "" Or txtValorOrdena.Text = "" Then
+                txtValorOrdena.Text = "SecFecReg" ' " SecNumEds, SecFecFin, SecFecReg
+                txtSortDir.Text = "ASC" ' "DESC"
+            End If
+            EstatusObraxCont.DefaultView.Sort = txtValorOrdena.Text + " " + txtSortDir.Text
+            ''----------------------------Datos para Ordenamiento----------------------------''
+
+            gvEstatus.DataSource = EstatusObraxCont
+            gvEstatus.DataBind()
+            ViewState("EstatusObraxCont") = EstatusObraxCont
+        Else
+            Funciones.ModalNotificacion("EO_NULL")
+            dvListaEstatusObra.Visible = False
+
+        End If
+    End Sub
+
+    Private Sub InicializarSort(ByVal Sort As HtmlGenericControl, ByVal opt As Integer)
+        If opt = 1 Then
+            Sort.Attributes.Add("class", "fa fa-sort")
+        ElseIf opt = 2 Then
+            Dim SortDir As String = txtSortDir.Text
+            If SortDir = "DESC" Then
+                SortDir = "ASC"
+                Sort.Attributes.Add("class", "fa fa-sort-desc")
+            ElseIf SortDir = "ASC" Then
+                SortDir = "DESC"
+                Sort.Attributes.Add("class", "fa fa-sort-asc")
+            End If
+        End If
+    End Sub
+
+    Private Sub gvEstatus_RowDataBound(sender As Object, e As GridViewRowEventArgs) Handles gvEstatus.RowDataBound
+        If e.Row.RowType = DataControlRowType.DataRow Then
+            Dim index As Integer = e.Row.RowIndex
+            Dim Sec As Integer = gvEstatus.DataKeys(index)("Sec")
+            Dim Estado As String = gvEstatus.DataKeys(index)("Estado")
+            Dim PorcentajeAvance As String = gvEstatus.DataKeys(index)("PorcentajeAvance")
+            Dim FechaAvance As String = gvEstatus.DataKeys(index)("FechaAvance")
+            Dim FechaReg As String = gvEstatus.DataKeys(index)("FechaReg")
+            Dim Observacion As String = gvEstatus.DataKeys(index)("Observacion")
+            Dim UsuarioRegistra As String = gvEstatus.DataKeys(index)("UsuarioRegistra")
+            Dim FechaRegistro As String = gvEstatus.DataKeys(index)("FechaRegistro")
+            Dim UsuarioModifica As String = gvEstatus.DataKeys(index)("UsuarioModifica")
+            Dim FechaModifica As String = gvEstatus.DataKeys(index)("FechaModifica")
+
+            Dim LblSec As Label = e.Row.FindControl("grvLblSec")
+            Dim LblEstado As Label = e.Row.FindControl("grvLblEstado")
+            Dim LblPorcentajeAvance As Label = e.Row.FindControl("grvLblPorcentajeAvance")
+            Dim LblFechaAvance As Label = e.Row.FindControl("grvLblFechaAvance")
+            Dim LblFechaRegistro As Label = e.Row.FindControl("grvLblFechaRegistro")
+            Dim lblObs As Label = e.Row.FindControl("grvLblObs")
+            Dim lblUsuarioRegistra As Label = e.Row.FindControl("grvLblUsuarioReg")
+
+            LblSec.Text = Sec
+            LblEstado.Text = Estado
+            LblPorcentajeAvance.Text = PorcentajeAvance
+            LblFechaAvance.Text = FechaAvance
+            LblFechaRegistro.Text = FechaReg
+            lblObs.Text = Observacion
+
+            lblUsuarioRegistra.Text = UsuarioRegistra
+            lblUsuarioRegistra.ToolTip = "Usuario Registra: " & UsuarioRegistra & Environment.NewLine &
+                                        "Fecha Registra: " & FechaRegistro & Environment.NewLine &
+                                        "Usuario Modifica: " & UsuarioModifica & Environment.NewLine &
+                                        "Fecha Modifica: " & FechaModifica
+
+        ElseIf e.Row.RowType = DataControlRowType.Header Then
+            Dim Sort1 As HtmlGenericControl = e.Row.FindControl("sort1")
+            Dim Sort2 As HtmlGenericControl = e.Row.FindControl("sort2")
+            Dim Sort3 As HtmlGenericControl = e.Row.FindControl("sort3")
+
+            InicializarSort(Sort1, 1)
+            InicializarSort(Sort2, 1)
+            InicializarSort(Sort3, 1)
+
+            Dim ValorOrd As String = txtValorOrdena.Text
+            If (ValorOrd = "SecPorcent") Then 'SecPorcent SecFechaA Sec
+                InicializarSort(Sort1, 2)
+            ElseIf (ValorOrd = "SecFechaA") Then
+                InicializarSort(Sort2, 2)
+            ElseIf (ValorOrd = "Sec") Then
+                InicializarSort(Sort3, 2)
+            End If
+        End If
+    End Sub
+
+    Private Sub gvEstatus_PageIndexChanging(sender As Object, e As GridViewPageEventArgs) Handles gvEstatus.PageIndexChanging
+        gvEstatus.PageIndex = e.NewPageIndex
+        dvNumConM.Visible = True
+        CargarEstatusObra(TxtIdContrato.Text)
+    End Sub
+
+    Private Sub gvEstatus_RowCommand(sender As Object, e As GridViewCommandEventArgs) Handles gvEstatus.RowCommand
+        Dim SecEstatus As String = e.CommandArgument.ToString
+
+        Select Case e.CommandName
+            Case "OrdenarPorcentaje"
+                'txtSortDirOpt.Text = 1
+                'txtValorOrdena.Text = "SecPorcent"
+                'GridSortDir()
+                dvNumConM.Visible = True
+                ValidarTipoSort("SecPorcent")
+            Case "OrdenarFecAvan"
+                'txtSortDirOpt.Text = 2
+                'txtValorOrdena.Text = "SecFechaA"
+                'GridSortDir()
+                dvNumConM.Visible = True
+                ValidarTipoSort("SecFechaA")
+            Case "OrdenarFecReg"
+                'txtSortDirOpt.Text = 3
+                'txtValorOrdena.Text = "Sec"
+                'GridSortDir()
+                dvNumConM.Visible = True
+                ValidarTipoSort("Sec")
+        End Select
+    End Sub
+
+    Private Sub ValidarTipoSort(ByVal TipoOpe As String)
+        Dim contador As Integer = 0
+        If Not txtValorOrdena.Text = TipoOpe Then
+            txtSortDir.Text = "ASC"
+            txtValorOrdena.Text = TipoOpe
+        Else
+            If txtSortDir.Text = "ASC" Then
+                txtSortDir.Text = "DESC"
+            Else
+                txtSortDir.Text = "ASC"
+            End If
+        End If
+        Dim EstatusObraXCont As DataTable = DirectCast(ViewState("EstatusObraxCont"), DataTable)
+        EstatusObraXCont.DefaultView.Sort = txtValorOrdena.Text + " " + txtSortDir.Text
+        gvEstatus.DataSource = EstatusObraXCont
+        gvEstatus.DataBind()
+
+    End Sub
+
+    Private Sub vContDatos_Load(sender As Object, e As EventArgs) Handles vContDatos.Load
+        dvNumConM.Visible = False
+    End Sub
+#End Region
+
+#Region "Duracion"
+    Private Sub tapDuracionCostI_Click(sender As Object, e As EventArgs) Handles tapDuracionCostI.Click
+        dvNumConM.Visible = True
+        mvExpediente.ActiveViewIndex = 1
+
+        AsignarClaseActiva(navtapDuracionCostI)
+    End Sub
+#End Region
+
+#Region "Fianzas"
+
+    Private Sub tapFianzas_Click(sender As Object, e As EventArgs) Handles tapFianzas.Click
+        dvNumConM.Visible = True
+        mvExpediente.ActiveViewIndex = 2
+
+        lblNoEndo.Visible = False
+        lblTituloListaEndo.Visible = False
+        grvEndo.Visible = False
+        AsignarClaseActiva(navtapFianzas)
+
+    End Sub
+
+    Private Sub gvFianzas_PageIndexChanging(sender As Object, e As GridViewPageEventArgs) Handles gvFianzas.PageIndexChanging
+        gvFianzas.PageIndex = e.NewPageIndex
+        ListarFianzas(TxtIdContrato.Text)
+        dvNumConM.Visible = True
+    End Sub
+
+    Private Sub grvEndo_PageIndexChanging(sender As Object, e As GridViewPageEventArgs) Handles grvEndo.PageIndexChanging
+        grvEndo.PageIndex = e.NewPageIndex
+        CargarEndos(txtIdFianza.Text)
+        dvNumConM.Visible = True
+    End Sub
+
+    Private Sub ListarFianzas(ByVal IdContrato As String)
+
+        Dim dtFianzas = New DataTable
+        Dim IdFianza As String = "-1"
+        Dim contador As Integer = 0
+
+        dtFianzas = IntJF.ListarFianzas(IdContrato, IdFianza, lsIdentificador)
+
+        If dtFianzas.Rows.Count > 0 Then
+            gvFianzas.Visible = True
+            gvFianzas.DataSource = dtFianzas
+            gvFianzas.DataBind()
+            gvFianzas.HeaderRow.TableSection = TableRowSection.TableHeader
+            For Each row In gvFianzas.Rows
+                row.Cells(1).ToolTip = "Presione para ver los Endosos"
+                contador = contador + 1
+            Next
+            lblNoEndo.Visible = False
+            LblListaFianzas.Visible = True
+            lblNoFianzas.Visible = False
+        Else
+            lblNoEndo.Visible = True
+            LblListaFianzas.Visible = False
+            lblNoFianzas.Visible = True
+            gvFianzas.Visible = False
+        End If
+    End Sub
+
+    Private Sub gvFianzas_RowDataBound(sender As Object, e As GridViewRowEventArgs) Handles gvFianzas.RowDataBound
+        If e.Row.RowType = DataControlRowType.DataRow Then
+            Dim index As Integer = e.Row.RowIndex
+            Dim Sec As Integer = gvFianzas.DataKeys(index)("Sec")
+            Dim NumPol As String = gvFianzas.DataKeys(index)("NumPol")
+            Dim TipoPoliza As String = gvFianzas.DataKeys(index)("TipoFianza")
+            Dim Monto As String = gvFianzas.DataKeys(index)("Monto")
+            Dim VigenciaInicial As String = gvFianzas.DataKeys(index)("VigenciaInicial")
+            Dim VigenciaFinal As String = gvFianzas.DataKeys(index)("VigenciaFinal")
+            Dim TipoEstado As String = gvFianzas.DataKeys(index)("TipoEstado")
+            Dim MontoFinal As String = gvFianzas.DataKeys(index)("MontoFinal")
+            Dim FechaFinal As String = gvFianzas.DataKeys(index)("FechaFinal")
+            Dim UsuarioRegistra As String = gvFianzas.DataKeys(index)("UsuarioRegistra")
+            Dim FechaRegistro As String = gvFianzas.DataKeys(index)("FechaRegistro")
+            Dim UsuarioModifica As String = gvFianzas.DataKeys(index)("UsuarioModifica")
+            Dim FechaModifica As String = gvFianzas.DataKeys(index)("FechaModifica")
+
+            Dim LblSec As Label = e.Row.FindControl("grvLblSecFian")
+            Dim LblTipoPoliza As Label = e.Row.FindControl("grvLblTipPol")
+            Dim LblEstPol As Label = e.Row.FindControl("grvLblEstPol")
+            Dim LblMonPol As Label = e.Row.FindControl("grvLblMonPol")
+            Dim LblVigI As Label = e.Row.FindControl("grvLblVigI")
+            Dim lblVigFin As Label = e.Row.FindControl("grvLblVigFin")
+            Dim lblFecFinEnd As Label = e.Row.FindControl("grvLblFecFinEnd")
+            Dim lblMonFinEnd As Label = e.Row.FindControl("grvLblMonFinEnd")
+            Dim lblUsuRegFin As Label = e.Row.FindControl("grvLblUsuRegFin")
+
+            LblSec.Text = Sec
+            LblTipoPoliza.Text = TipoPoliza
+            LblEstPol.Text = TipoEstado
+            LblMonPol.Text = ConvertirAMoney(Monto)
+            LblVigI.Text = VigenciaInicial
+            lblVigFin.Text = VigenciaFinal
+            lblMonFinEnd.Text = ConvertirAMoney(MontoFinal)
+            lblFecFinEnd.Text = FechaFinal
+            lblUsuRegFin.Text = UsuarioRegistra
+
+            lblUsuRegFin.ToolTip = "Usuario Registra: " & UsuarioRegistra & Environment.NewLine &
+                                   "Fecha Registra: " & FechaRegistro & Environment.NewLine &
+                                   "Usuario Modifica: " & UsuarioModifica & Environment.NewLine &
+                                   "Fecha Modifica: " & FechaModifica
+            'Else
+            '    MsgBox("Aqui esta el problema 2")
+            '    gvFianzas.Visible = False
+        End If
+    End Sub
+
+    Private Sub vFianzas_Load(sender As Object, e As EventArgs) Handles vFianzas.Load
+        ListarFianzas(TxtIdContrato.Text)
+    End Sub
+
+    Private Sub gvFianzas_RowCommand(sender As Object, e As GridViewCommandEventArgs) Handles gvFianzas.RowCommand
+        dvNumConM.Visible = True
+        Dim rowIndex As Integer
+        If IsNumeric(e.CommandArgument) Then
+            rowIndex = Convert.ToInt32(e.CommandArgument)
+            If (e.CommandName = "SelectPoliza") Then
+                txtIdFianza.Text = gvFianzas.DataKeys(rowIndex)("IdFianza").ToString()
+                Dim selectedRow As GridViewRow = gvFianzas.Rows(rowIndex)
+                Dim i As Integer = 1
+                For Each fila In gvFianzas.Rows
+                    selectedRow = fila
+                    If i = 1 Then
+                        i = 0
+                        selectedRow.Style.Add("background-color", "#f8f7ff")
+                    Else
+                        i = 1
+                        selectedRow.Style.Add("background-color", "#ffffff")
+                    End If
+                Next
+                selectedRow = gvFianzas.Rows(rowIndex)
+                selectedRow.Style.Add("background-color", "#a8d2ff")
+                CargarEndos(txtIdFianza.Text)
+            End If
+        End If
+    End Sub
+
+    Private Sub CargarEndos(ByVal IdFianza As String)
+        Dim lsIdentificador As String = Funciones.GetUsuarioIdentificador
+        Dim dtEndoso As New DataTable
+
+        dtEndoso = IntJF.ListarEndoso(IdFianza, lsIdentificador)
+
+        If dtEndoso.Rows.Count > 0 Then
+            dvEndo.Visible = True
+            grvEndo.DataSource = dtEndoso
+            grvEndo.DataBind()
+            lblTituloListaEndo.Visible = True
+            lblNoEndo.Visible = False
+            grvEndo.Visible = True
+        Else
+            lblTituloListaEndo.Visible = False
+            lblNoEndo.Visible = True
+            grvEndo.Visible = False
+        End If
+    End Sub
+
+    Private Sub grvEndo_RowDataBound(sender As Object, e As GridViewRowEventArgs) Handles grvEndo.RowDataBound
+        If e.Row.RowType = DataControlRowType.DataRow Then
+            Dim index As Integer = e.Row.RowIndex
+            Dim Endoso As Integer = grvEndo.DataKeys(index)("SecNumEds")
+            Dim Tipo As String = grvEndo.DataKeys(index)("TipoEndoso")
+            Dim MontoEndoso As String = grvEndo.DataKeys(index)("Monto")
+            Dim FechaFinal As String = grvEndo.DataKeys(index)("FechaFinal")
+            Dim FechaRegistro As String = grvEndo.DataKeys(index)("FechaRegistro")
+            Dim UsuarioRegistra As String = grvEndo.DataKeys(index)("UsuarioRegistra")
+            Dim UsuarioModifica As String = grvEndo.DataKeys(index)("UsuarioModifica")
+            Dim FechaModifica As String = grvEndo.DataKeys(index)("FechaModifica")
+
+
+            Dim LblEndoso As Label = e.Row.FindControl("grvLblEndo")
+            Dim LblTipo As Label = e.Row.FindControl("grvLblTipoEndo")
+            Dim LblMonEndo As Label = e.Row.FindControl("grvLblMonEndo")
+            Dim LblFecFinEndo As Label = e.Row.FindControl("grvLblFecFinEndo")
+            Dim LblFecRegEndo As Label = e.Row.FindControl("grvLblFecRegEndo")
+            Dim LblUsuRegEndo As Label = e.Row.FindControl("grvLblUsuRegEndo")
+
+            LblEndoso.Text = Endoso
+            LblTipo.Text = Tipo
+            LblMonEndo.Text = ConvertirAMoney(MontoEndoso)
+            LblFecFinEndo.Text = FechaFinal
+            LblFecRegEndo.Text = FechaRegistro
+            LblUsuRegEndo.Text = UsuarioRegistra
+
+            LblUsuRegEndo.ToolTip = "Usuario Registra: " & UsuarioRegistra & Environment.NewLine &
+                                        "Fecha Registra: " & FechaRegistro & Environment.NewLine &
+                                        "Usuario Modifica: " & UsuarioModifica & Environment.NewLine &
+                                        "Fecha Modifica: " & FechaModifica
+
+        ElseIf (e.Row.RowType = DataControlRowType.Footer) And (grvEndo.PageIndex = grvEndo.PageCount - 1) Then
+            Dim dt As New DataTable
+            dt = grvEndo.DataSource
+        End If
+    End Sub
+#End Region
+
+#Region "Historial"
+    Private Sub tapHisEle_Click(sender As Object, e As EventArgs) Handles tapHisEle.Click
+        dvNumConMM.Visible = True
+        mvExpediente.ActiveViewIndex = 4
+
+        AsignarClaseActiva(navtapHisEle)
+    End Sub
+
+    Private Sub CargaEstElc()
+        Dim EstElc As New DataTable
+        EstElc = IntAD.ListarEstadoElectronico(lsIdentificador)
+
+        ddlEstEle.Items.Clear()
+
+        Dim Pred As ListItem = New ListItem
+        Pred.Text = "--Todos--"
+        Pred.Value = ""
+
+        ddlEstEle.Items.Add(Pred)
+        If EstElc.Rows.Count > 0 Then
+            For Each r As DataRow In EstElc.Rows
+                ddlEstEle.Items.Add(New ListItem(r.Item("Descripcion"), r.Item("IdEstadoElectronico")))
+            Next
+        End If
+    End Sub
+
+
+#End Region
+
+#Region "Gestion de los Tabs"
+    Private Sub AsignarClaseActiva(ByRef li_Activo As HtmlGenericControl)
+        navtapContrato.Attributes.Remove("class")
+        navtapDuracionCostI.Attributes.Remove("class")
+        navtapEmpresaAdj.Attributes.Remove("class")
+        navtapFianzas.Attributes.Remove("class")
+        navtapSaldosDesem.Attributes.Remove("class")
+        navtapEstatus.Attributes.Remove("class")
+        navtapActas.Attributes.Remove("class")
+        navtapVisitaEval.Attributes.Remove("class")
+        navtapHisEle.Attributes.Remove("class")
+
+        li_Activo.Attributes.Add("class", "active")
+
+        tapDuracionCostI.Enabled = True
+        tapEmpresaAdj.Enabled = True
+        tapFianzas.Enabled = True
+        tapSaldosDesem.Enabled = True
+        tapEstatus.Enabled = True
+        tapActas.Enabled = True
+        tapVisitaEval.Enabled = True
+    End Sub
+#End Region
+
+#Region "Empresa Adjudicada"
+
+    Private Sub ConsultarSiHayEmpresaAdjudicada(ByVal idActoPublico As String)
+        Dim lsIdentificador As String = Funciones.GetUsuarioIdentificador
+        Dim dt As New DataTable
+
+        grvEmpAdjudicada.DataSource = Nothing
+        grvEmpAdjudicada.DataBind()
+
+        grvConsorcioAdju.DataSource = Nothing
+        grvConsorcioAdju.DataBind()
+        lblTituloGridConsorcioAdju_TabAdju.Text = ""
+
+        dt = IntAD.ConsultarEmpresaAdjudicadaContrato(idActoPublico, TxtIdContrato.Text, lsIdentificador) 'liTC.ConsultarEmpresaAdjudicada(idActoPublico, lsIdentificador)
+        If dt.Rows.Count > 0 Then
+            If Not IsNumeric(dt(0)(0)) Then
+                Funciones.ModalNotificacion("ERROR1")
+                MostrarDivEmpresaAdjudicada(False)
+            Else
+                grvEmpAdjudicada.DataSource = dt
+                grvEmpAdjudicada.DataBind()
+                MostrarDivEmpresaAdjudicada(True)
+                Dim contador As Integer = 0
+                For Each row In grvEmpAdjudicada.Rows
+
+                    Dim x = row.Cells(2)
+
+                    Dim UsuarioRegistra As String = grvEmpAdjudicada.DataKeys(contador)("UsuarioRegistra")
+                    Dim FechaRegistro As String = grvEmpAdjudicada.DataKeys(contador)("FechaRegistro")
+                    Dim UsuarioModifica As String = grvEmpAdjudicada.DataKeys(contador)("UsuarioModifica")
+                    Dim FechaModifica As String = grvEmpAdjudicada.DataKeys(contador)("FechaModifica")
+                    contador = contador + 1
+                    row.Cells(2).ToolTip = "Presione ver empresas asociadas"
+                    row.Cells(7).ToolTip = "Usuario Registra: " & UsuarioRegistra & Environment.NewLine &
+                                        "Fecha Registra: " & FechaRegistro & Environment.NewLine &
+                                        "Usuario Modifica: " & UsuarioModifica & Environment.NewLine &
+                                        "Fecha Modifica: " & FechaModifica
+
+
+                Next
+                If dt.Rows(0).Item("CodTipoEmpresa") = "1" Then
+                    btnEmpGru.Visible = False
+                Else
+                    btnEmpGru.Visible = True
+                End If
+            End If
+        Else
+            MostrarDivEmpresaAdjudicada(False)
+        End If
+
+        dt = IntAD.ListarJuntaAdjudicada(TxtIdContrato.Text, txtIdEmpresa.Text, lsIdentificador)
+        If dt.Rows.Count > 0 Then
+            btnJunDir.Visible = True
+        Else
+            btnJunDir.Visible = False
+        End If
+
+    End Sub
+
+    Private Sub MostrarDivEmpresaAdjudicada(ByVal mostrar As Boolean)
+        Dim cls As String
+        Dim newCls As String
+        If mostrar Then
+            cls = dvGridAdju.Attributes("class")
+            newCls = cls.Replace("Oculto", "")
+            dvGridAdju.Attributes("class") = newCls
+
+            dvNoAdju.Attributes.Add("class", "Oculto")
+        Else
+            lblMensajeNoAdju.Text = "Este contrato no tiene empresa adjudicada."
+
+            cls = dvNoAdju.Attributes("class")
+            newCls = cls.Replace("Oculto", "")
+            dvNoAdju.Attributes("class") = newCls
+
+            dvGridAdju.Attributes.Add("class", "Oculto")
+        End If
+    End Sub
+
+    Private Sub LlenarGridConsorcioAdju(ByVal tipoSeleccionado As String, ByVal idEmpresa As String, ByVal DescTipoEmpresa As String)
+        Dim lsIdentificador As String = Funciones.GetUsuarioIdentificador
+        Dim dt As New DataTable
+        grvConsorcioAdju.DataSource = Nothing
+        grvConsorcioAdju.DataBind()
+        lblTituloGridConsorcioAdju_TabAdju.Text = ""
+        If tipoSeleccionado = "G" Then
+            dt = IntAB.CargarGrupoEmpresa(idEmpresa, lsIdentificador)
+            If dt.Rows.Count > 0 Then
+                grvConsorcioAdju.DataSource = dt
+                grvConsorcioAdju.DataBind()
+                If DescTipoEmpresa = "Consorcio" Then
+                    lblTituloGridConsorcioAdju_TabAdju.Text = "Empresas del Consorcio"
+                Else
+                    lblTituloGridConsorcioAdju_TabAdju.Text = "Empresas de la Asociación"
+                End If
+
+            End If
+        End If
+    End Sub
+
+    Private Sub grvEmpAdjudicada_RowCommand(sender As Object, e As GridViewCommandEventArgs) Handles grvEmpAdjudicada.RowCommand
+        Dim rowIndex As Integer
+        Dim lsIdentificador As String = Funciones.GetUsuarioIdentificador
+        If IsNumeric(e.CommandArgument) Then
+            rowIndex = Convert.ToInt32(e.CommandArgument)
+            If (e.CommandName = "SelectProp") Then
+                Dim tipo As String = grvEmpAdjudicada.DataKeys(rowIndex)("CodTipoEmpresa").ToString()
+                Dim idEmpresa As String = grvEmpAdjudicada.DataKeys(rowIndex)("CodEmpresaProponente").ToString()
+                Dim DescTipoEmpresa As String = Replace(grvEmpAdjudicada.DataKeys(rowIndex)("DescTipoEmpresa").ToString(), vbCrLf, "")
+
+                Dim dt2 As DataTable = New DataTable
+                dt2 = IntAB.ListarTipoEmpresa(lsIdentificador)
+                Dim tipoSeleccionado As String = 0
+                For Each row As DataRow In dt2.Rows
+                    If tipo = row.Item("Id") Then
+                        tipoSeleccionado = row.Item("Tipo")
+                    End If
+                Next
+
+                LlenarGridConsorcioAdju(tipoSeleccionado, idEmpresa, DescTipoEmpresa)
+            End If
+
+        End If
+    End Sub
+
+    Private Sub tapEmpresaAdj_Click(sender As Object, e As EventArgs) Handles tapEmpresaAdj.Click
+        dvNumConM.Visible = True
+        Dim idActoPublico As String = txtActoPubEmpAdj.Text
+        If Not IsNumeric(idActoPublico) Then
+            idActoPublico = 0
+        End If
+        IrTabEmpresaAdjudicada(idActoPublico)
+    End Sub
+
+    Private Sub IrTabEmpresaAdjudicada(ByVal idActoPublico As Integer)
+        dvNumConM.Visible = True
+        If idActoPublico = 0 Or idActoPublico = -1 Then
+
+        Else
+            ConsultarSiHayEmpresaAdjudicada(idActoPublico)
+
+            mvEmpAdj.ActiveViewIndex = "-1"
+            mvExpediente.ActiveViewIndex = 5
+            AsignarClaseActiva(navtapEmpresaAdj)
+        End If
+    End Sub
+
+    Private Sub btnEmpGru_Click(sender As Object, e As EventArgs) Handles btnEmpGru.Click
+        dvNumConM.Visible = True
+        mvEmpAdj.ActiveViewIndex = 1
+
+        Dim rowIndex As Integer
+        Dim lsIdentificador As String = Funciones.GetUsuarioIdentificador
+        Dim tipo As String = grvEmpAdjudicada.DataKeys(rowIndex)("CodTipoEmpresa").ToString()
+        Dim idEmpresa As String = grvEmpAdjudicada.DataKeys(rowIndex)("CodEmpresaProponente").ToString()
+        Dim DescTipoEmpresa As String = Replace(grvEmpAdjudicada.DataKeys(rowIndex)("DescTipoEmpresa").ToString(), vbCrLf, "")
+
+        Dim dt2 As DataTable = New DataTable
+        dt2 = IntAB.ListarTipoEmpresa(lsIdentificador)
+        Dim tipoSeleccionado As String = 0
+        For Each row As DataRow In dt2.Rows
+            If tipo = row.Item("Id") Then
+                tipoSeleccionado = row.Item("Tipo")
+            End If
+        Next
+
+        'Para paginacion
+        hdIdTipEmp.Text = tipoSeleccionado
+        hdIdEmp.Text = ID
+        hdDesEmp.Text = DescTipoEmpresa
+
+        LlenarGridConsorcioAdju2(tipoSeleccionado, idEmpresa, DescTipoEmpresa)
+    End Sub
+
+    Private Sub btnJunDir_Click(sender As Object, e As EventArgs) Handles btnJunDir.Click
+        dvNumConM.Visible = True
+        mvEmpAdj.ActiveViewIndex = 2
+        CargaJuntaDirectiva()
+    End Sub
+
+    Private Sub btnProponentes_Click(sender As Object, e As EventArgs) Handles btnProponentes.Click
+        dvNumConM.Visible = True
+        mvEmpAdj.ActiveViewIndex = 0
+        dvEmpresasConsorcio.Visible = False
+        LlenarGridProponentes(txtActoPubEmpAdj.Text, "0", txtIdRenglon.Text)
+    End Sub
+
+    Private Function LlenarGridProponentes(ByVal idActoPublico As String, ByVal idProponente As String, ByVal idRenglon As String) As DataTable
+        Dim lsIdentificador As String = Funciones.GetUsuarioIdentificador
+        Dim dtProponente As New DataTable
+        Dim contador As Integer = 0
+
+        grvProponentes.DataSource = Nothing
+        grvProponentes.DataBind()
+
+        If Not IsNumeric(idRenglon) Then
+            idRenglon = 0
+        End If
+
+        dtProponente = IntTC.ConsultarProponente(idProponente, idActoPublico, idRenglon, lsIdentificador)
+
+        If dtProponente.Rows.Count > 0 Then
+            If Not IsNumeric(dtProponente(0)(0)) Then
+                Funciones.ModalNotificacion("ERROR1")
+                lblTituloGridProponente.Visible = False
+            Else
+                grvProponentes.DataSource = dtProponente
+                grvProponentes.DataBind()
+
+                For Each row In grvProponentes.Rows
+                    row.Cells(3).ToolTip = "Presione para ver empresas del consorcio"
+                    row.Cells(9).ToolTip = "Usuario Registra: " & grvProponentes.DataKeys(contador)("UsuarioRegistra").ToString & Environment.NewLine &
+                                           "Fecha Registra: " & grvProponentes.DataKeys(contador)("FechaRegistro").ToString & Environment.NewLine & "Usuario Modifica: " &
+                                            grvProponentes.DataKeys(contador)("UsuarioModifica").ToString & Environment.NewLine & "Fecha Modifica: " &
+                                            grvProponentes.DataKeys(contador)("FechaModifica").ToString
+                    contador = contador + 1
+                Next
+                lblTituloGridProponente.Visible = True
+                lblNoPropo.Visible = False
+            End If
+        Else
+            lblTituloGridProponente.Visible = False
+            lblNoPropo.Visible = True
+        End If
+        Return dtProponente
+    End Function
+
+    Private Sub grvProponentes_RowCommand(sender As Object, e As GridViewCommandEventArgs) Handles grvProponentes.RowCommand
+        dvNumConM.Visible = True
+        Dim rowIndex As Integer
+        Dim lsIdentificador As String = Funciones.GetUsuarioIdentificador
+        If IsNumeric(e.CommandArgument) Then
+            If (e.CommandName = "SelectProp") Then
+                rowIndex = Convert.ToInt32(e.CommandArgument)
+                Dim id As String = ""
+                id = grvProponentes.DataKeys(rowIndex)("CodEmpresaProponente").ToString()
+
+                Dim DescTipoEmpresa As String = Replace(grvProponentes.DataKeys(rowIndex)("DescTipoEmpresa").ToString(), vbCrLf, "")
+                Dim tipo As String = grvProponentes.DataKeys(rowIndex)("CodTipoEmpresa").ToString()
+
+                Dim dt2 As DataTable = New DataTable
+                dt2 = IntAB.ListarTipoEmpresa(lsIdentificador)
+                Dim tipoSeleccionado As String = 0
+                For Each row As DataRow In dt2.Rows
+                    If tipo = row.Item("Id") Then
+                        tipoSeleccionado = row.Item("Tipo")
+                    End If
+                Next
+
+                'Para paginacion
+                hdIdTipEmp.Text = tipoSeleccionado
+                hdIdEmp.Text = id
+                hdDesEmp.Text = DescTipoEmpresa
+
+                LlenarGridConsorcios(id, tipoSeleccionado, DescTipoEmpresa)
+                dvEmpresasConsorcio.Visible = True
+            End If
+
+
+        End If
+    End Sub
+
+    Private Sub LlenarGridConsorcios(ByVal IdProponente As String, ByVal tipoSeleccionado As String, ByVal descripcionTipo As String)
+        Dim lsIdentificador As String = Funciones.GetUsuarioIdentificador
+        Dim dt As New DataTable
+
+        grvEmpresasConsorcio.DataSource = Nothing
+        grvEmpresasConsorcio.DataBind()
+
+        lblTitutloGrvEmpresasCons_Asc.Text = ""
+
+        If tipoSeleccionado = "G" Then
+            dt = IntAB.CargarGrupoEmpresa(IdProponente, lsIdentificador)
+            If dt.Rows.Count > 0 Then
+                grvEmpresasConsorcio.DataSource = dt
+                grvEmpresasConsorcio.DataBind()
+
+                If descripcionTipo = "Consorcio" Then
+                    lblTitutloGrvEmpresasCons_Asc.Text = "Empresas del Consorcio"
+                Else
+                    lblTitutloGrvEmpresasCons_Asc.Text = "Empresas de la Asociación"
+                End If
+                lblTitutloGrvEmpresasCons_Asc.Visible = True
+            Else
+                lblTitutloGrvEmpresasCons_Asc.Visible = False
+            End If
+        Else
+            lblTitutloGrvEmpresasCons_Asc.Visible = False
+        End If
+
+    End Sub
+
+    Private Sub btnCerrarEAP_Click(sender As Object, e As EventArgs) Handles btnCerrarEAP.Click
+        dvNumConM.Visible = True
+        mvEmpAdj.ActiveViewIndex = "-1"
+    End Sub
+
+    Private Sub LlenarGridConsorcioAdju2(ByVal tipoSeleccionado As String, ByVal idEmpresa As String, ByVal DescTipoEmpresa As String)
+        Dim lsIdentificador As String = Funciones.GetUsuarioIdentificador
+        Dim dt As New DataTable
+        grvConsorcioAdju2.DataSource = Nothing
+        grvConsorcioAdju2.DataBind()
+        lblTituloGridConsorcioAdju_TabAdju2.Text = ""
+        If tipoSeleccionado = "G" Then
+            dt = IntAB.CargarGrupoEmpresa(idEmpresa, lsIdentificador)
+            If dt.Rows.Count > 0 Then
+                grvConsorcioAdju2.DataSource = dt
+                grvConsorcioAdju2.DataBind()
+                If DescTipoEmpresa = "Consorcio" Then
+                    lblTituloGridConsorcioAdju_TabAdju2.Text = "Empresas del Consorcio"
+                Else
+                    lblTituloGridConsorcioAdju_TabAdju2.Text = "Empresas de la Asociación"
+                End If
+
+            End If
+        End If
+    End Sub
+
+    Private Sub btnCerrarEAE_Click(sender As Object, e As EventArgs) Handles btnCerrarEAE.Click
+        dvNumConM.Visible = True
+        mvEmpAdj.ActiveViewIndex = "-1"
+    End Sub
+
+    Private Sub CargaJuntaDirectiva()
+        Dim lsIdentificador As String = Funciones.GetUsuarioIdentificador
+        Dim dt As New DataTable
+        gvJuntaDirectiva.DataSource = Nothing
+        gvJuntaDirectiva.DataBind()
+        dt = IntAD.ListarJuntaAdjudicada(TxtIdContrato.Text, txtIdEmpresa.Text, lsIdentificador)
+        If dt.Rows.Count > 0 Then
+            gvJuntaDirectiva.DataSource = dt
+            gvJuntaDirectiva.DataBind()
+            lblJunDir.Visible = True
+            btnCerrarEAJ.Visible = True
+        Else
+            lblJunDir.Visible = False
+            btnCerrarEAJ.Visible = False
+        End If
+    End Sub
+
+    Private Sub btnCerrarEAJ_Click(sender As Object, e As EventArgs) Handles btnCerrarEAJ.Click
+        dvNumConM.Visible = True
+        mvEmpAdj.ActiveViewIndex = "-1"
+    End Sub
+
+    Private Sub grvProponentes_PageIndexChanging(sender As Object, e As GridViewPageEventArgs) Handles grvProponentes.PageIndexChanging
+        dvNumConM.Visible = True
+        grvProponentes.PageIndex = e.NewPageIndex
+        LlenarGridProponentes(txtActoPubEmpAdj.Text, "0", txtIdRenglon.Text)
+    End Sub
+
+    Private Sub gvJuntaDirectiva_PageIndexChanging(sender As Object, e As GridViewPageEventArgs) Handles gvJuntaDirectiva.PageIndexChanging
+        dvNumConM.Visible = True
+        gvJuntaDirectiva.PageIndex = e.NewPageIndex
+        CargaJuntaDirectiva()
+    End Sub
+
+    Private Sub grvConsorcioAdju_PageIndexChanging(sender As Object, e As GridViewPageEventArgs) Handles grvConsorcioAdju.PageIndexChanging
+        dvNumConM.Visible = True
+        grvConsorcioAdju.PageIndex = e.NewPageIndex
+        LlenarGridConsorcioAdju(hdIdTipEmp.Text, hdIdEmp.Text, hdDesEmp.Text)
+    End Sub
+
+    Private Sub grvConsorcioAdju2_PageIndexChanging(sender As Object, e As GridViewPageEventArgs) Handles grvConsorcioAdju2.PageIndexChanging
+        dvNumConM.Visible = True
+        grvConsorcioAdju2.PageIndex = e.NewPageIndex
+        LlenarGridConsorcioAdju2(hdIdTipEmp.Text, hdIdEmp.Text, hdDesEmp.Text)
+    End Sub
+
+    Private Sub grvEmpresasConsorcio_PageIndexChanging(sender As Object, e As GridViewPageEventArgs) Handles grvEmpresasConsorcio.PageIndexChanging
+        dvNumConM.Visible = True
+        grvEmpresasConsorcio.PageIndex = e.NewPageIndex
+        LlenarGridConsorcios(hdIdTipEmp.Text, hdIdEmp.Text, hdDesEmp.Text)
+    End Sub
+
+#End Region
+
+#Region "SaldosDesembolsos"
+    Private Sub tapSaldosDesem_Click(sender As Object, e As EventArgs) Handles tapSaldosDesem.Click
+        dvNumConM.Visible = True
+        mvExpediente.ActiveViewIndex = 7
+        mvSalDes.ActiveViewIndex = -1
+        navTapSDContrato.Attributes.Remove("class")
+        navTapSDCosAdi.Attributes.Remove("class")
+        navTapSDSalPro.Attributes.Remove("class")
+
+        AsignarClaseActiva(navtapSaldosDesem)
+    End Sub
+
+    Private Sub TapSDContrato_Click(sender As Object, e As EventArgs) Handles TapSDContrato.Click
+        dvNumConM.Visible = True
+        mvSalDes.ActiveViewIndex = 0
+        navTapSDContrato.Attributes.Add("class", "active")
+        navTapSDCosAdi.Attributes.Remove("class")
+        navTapSDSalPro.Attributes.Remove("class")
+
+        CargarDesembolsosBusquedaC()
+    End Sub
+
+    Private Sub TapSDCosAdi_Click(sender As Object, e As EventArgs) Handles TapSDCosAdi.Click
+        dvNumConM.Visible = True
+        mvSalDes.ActiveViewIndex = 1
+        navTapSDCosAdi.Attributes.Add("class", "active")
+        navTapSDContrato.Attributes.Remove("class")
+        navTapSDSalPro.Attributes.Remove("class")
+
+        CargarDesembolsosBusquedaA()
+    End Sub
+
+    Private Sub TapSDSalPro_Click(sender As Object, e As EventArgs) Handles TapSDSalPro.Click
+        dvNumConM.Visible = True
+        mvSalDes.ActiveViewIndex = 2
+        navTapSDSalPro.Attributes.Add("class", "active")
+        navTapSDCosAdi.Attributes.Remove("class")
+        navTapSDContrato.Attributes.Remove("class")
+
+        ConsultarSaldoDelProyecto()
+    End Sub
+
+    Private Function ConvertirAMoney(ByVal Monto As String, Optional ByVal ValorRetornoVacio As String = "")
+        Dim NewMonto As String = ValorRetornoVacio
+        If Not String.IsNullOrWhiteSpace(Monto) Then
+            NewMonto = Format(CDec(Monto), "##,##0.00")
+        End If
+        Return NewMonto
+    End Function
+
+    Private Sub CargarDesembolsosBusquedaC()
+        Dim lsIdentificador As String = Funciones.GetUsuarioIdentificador
+        Dim dtDesembolso As New DataTable
+        Dim contador As Integer = 0
+        Dim TlValorBruto = 0.00, TlRetencionGarant = 0.00, TlAmortizacionAnticipo = 0.00, TlItbmsTotal = 0.00, TlRetencionItbms = 0.00, TlValorNetoPag = 0.00, TlOtros = 0.00, TlDevolucionRetGarant As String = 0.00
+        Dim CantidadPage As String
+
+        grvDesembolsosC.DataSource = Nothing
+        grvDesembolsosC.DataBind()
+
+        Dim IdContrato As String = TxtIdContrato.Text
+        Dim TipoDesembolso As String = "C"
+
+        dtDesembolso = IntJF.ListarDesembolsosExpElectronico(IdContrato, TipoDesembolso, lsIdentificador)
+
+        If dtDesembolso.Rows.Count > 0 Then
+            dvListadoDesembolsosC.Visible = True
+
+            For Each i In dtDesembolso.Rows
+                i.item("ValorBruto") = ConvertirAMoney(i.item("ValorBruto"))
+                i.item("RetencionGarant") = ConvertirAMoney(i.item("RetencionGarant"))
+                i.item("DevolucionRetGarant") = ConvertirAMoney(i.item("DevolucionRetGarant"))
+                i.item("AmortizacionAnticipo") = ConvertirAMoney(i.item("AmortizacionAnticipo"))
+                i.item("PorcentItbms") = ConvertirAMoney(i.item("PorcentItbms"))
+                i.item("ItbmsTotal") = ConvertirAMoney(i.item("ItbmsTotal"))
+                i.item("RetencionItbms") = ConvertirAMoney(i.item("RetencionItbms"))
+                i.item("Otros") = ConvertirAMoney(i.item("Otros"))
+                i.item("ValorNetoPag") = ConvertirAMoney(i.item("ValorNetoPag"))
+                TlValorBruto = CDec(TlValorBruto) + CDec(ConvertirAMoney(i.item("ValorBruto"), "0.00"))
+                TlRetencionGarant = CDec(TlRetencionGarant) + CDec(ConvertirAMoney(i.item("RetencionGarant"), "0.00"))
+                TlDevolucionRetGarant = CDec(TlDevolucionRetGarant) + CDec(ConvertirAMoney(i.item("DevolucionRetGarant"), "0.00"))
+                TlAmortizacionAnticipo = CDec(TlAmortizacionAnticipo) + CDec(ConvertirAMoney(i.item("AmortizacionAnticipo"), "0.00"))
+                TlItbmsTotal = CDec(TlItbmsTotal) + CDec(ConvertirAMoney(i.item("ItbmsTotal"), "0.00"))
+                TlRetencionItbms = CDec(TlRetencionItbms) + CDec(ConvertirAMoney(i.item("RetencionItbms"), "0.00"))
+                TlOtros = CDec(TlOtros) + CDec(ConvertirAMoney(i.item("Otros"), "0.00"))
+                TlValorNetoPag = CDec(TlValorNetoPag) + CDec(ConvertirAMoney(i.item("ValorNetoPag"), "0.00"))
+            Next
+
+            grvDesembolsosC.DataSource = dtDesembolso
+            grvDesembolsosC.DataBind()
+
+            For Each row In grvDesembolsosC.Rows
+                row.Cells(12).ToolTip = "Usuario Registra: " & grvDesembolsosC.DataKeys(contador)("UsuarioRegistra").ToString & Environment.NewLine &
+                                        "Fecha Registra: " & grvDesembolsosC.DataKeys(contador)("FechaRegistro").ToString & Environment.NewLine & "Usuario Modifica: " &
+                                        grvDesembolsosC.DataKeys(contador)("UsuarioModifica").ToString & Environment.NewLine & "Fecha Modifica: " &
+                                        grvDesembolsosC.DataKeys(contador)("FechaModifica").ToString
+                'row.Cells(18).ToolTip = "Presione para Editar este registro."
+                'row.Cells(19).ToolTip = "Presione para Eliminar este registro."
+                contador = contador + 1
+            Next
+            CantidadPage = grvDesembolsosC.PageCount - 1
+            If grvDesembolsosC.PageIndex = grvDesembolsosC.PageCount - 1 Then
+                grvDesembolsosC.FooterRow.Visible = True
+                grvDesembolsosC.FooterRow.Cells(2).Text = "TOTAL"
+                grvDesembolsosC.FooterRow.Cells(3).Text = ConvertirAMoney(TlValorBruto)
+                grvDesembolsosC.FooterRow.Cells(4).Text = ConvertirAMoney(TlRetencionGarant)
+                grvDesembolsosC.FooterRow.Cells(5).Text = ConvertirAMoney(TlDevolucionRetGarant)
+                grvDesembolsosC.FooterRow.Cells(6).Text = ConvertirAMoney(TlAmortizacionAnticipo)
+                grvDesembolsosC.FooterRow.Cells(7).Text = ConvertirAMoney(TlItbmsTotal)
+                grvDesembolsosC.FooterRow.Cells(8).Text = ConvertirAMoney(TlRetencionItbms)
+                grvDesembolsosC.FooterRow.Cells(9).Text = ConvertirAMoney(TlOtros)
+                grvDesembolsosC.FooterRow.Cells(10).Text = ConvertirAMoney(TlValorNetoPag)
+                grvDesembolsosC.FooterRow.Cells(2).Font.Bold = True
+                grvDesembolsosC.FooterRow.Cells(3).Font.Bold = True
+                grvDesembolsosC.FooterRow.Cells(4).Font.Bold = True
+                grvDesembolsosC.FooterRow.Cells(5).Font.Bold = True
+                grvDesembolsosC.FooterRow.Cells(6).Font.Bold = True
+                grvDesembolsosC.FooterRow.Cells(7).Font.Bold = True
+                grvDesembolsosC.FooterRow.Cells(8).Font.Bold = True
+                grvDesembolsosC.FooterRow.Cells(9).Font.Bold = True
+                grvDesembolsosC.FooterRow.Cells(10).Font.Bold = True
+            Else
+                grvDesembolsosC.FooterRow.Visible = False
+            End If
+
+            lblTituloGridDesembolsosC.Visible = True
+
+            If TipoDesembolso = "C" Then
+                txtMntIniCO.Text = dtDesembolso.Rows(0).Item("MontoInicial")
+                txtMntFConAdCO.Text = dtDesembolso.Rows(0).Item("MontoFinalConAd")
+                txtMntAntCO.Text = dtDesembolso.Rows(0).Item("MontoAnticipo")
+
+                txtMntFCO.Text = CDec(TlValorBruto) + CDec(TlItbmsTotal)
+                txtSldCO.Text = CDec(txtMntFConAdCO.Text) - CDec(txtMntFCO.Text)
+                txtSldRetxPgCO.Text = CDec(TlRetencionGarant) - CDec(TlDevolucionRetGarant)
+                txtSldAntCO.Text = CDec(txtMntAntCO.Text) - CDec(TlAmortizacionAnticipo)
+            ElseIf TipoDesembolso = "A" Then
+                txtMntIniCA.Text = dtDesembolso.Rows(0).Item("MontoInicial")
+                txtMntFConAdCA.Text = dtDesembolso.Rows(0).Item("MontoFinalConAd")
+                txtMntAntCA.Text = dtDesembolso.Rows(0).Item("MontoAnticipo")
+
+                txtMntFCA.Text = CDec(TlValorBruto) + CDec(TlItbmsTotal)
+                txtSldCA.Text = CDec(txtMntFConAdCA.Text) - CDec(txtMntFCA.Text)
+                txtSldRetxPgCA.Text = CDec(TlRetencionGarant) - CDec(TlDevolucionRetGarant)
+                txtSldAntCA.Text = CDec(txtMntAntCA.Text) - CDec(TlAmortizacionAnticipo)
+            End If
+        Else
+            Funciones.ModalNotificacion("MSG-D03")
+            lblTituloGridDesembolsosC.Visible = False
+            dvListadoDesembolsosC.Visible = False
+            mvSalDes.ActiveViewIndex = -1
+        End If
+    End Sub
+
+    Private Sub CargarDesembolsosBusquedaA()
+        Dim lsIdentificador As String = Funciones.GetUsuarioIdentificador
+        Dim dtDesembolso As New DataTable
+        Dim contador As Integer = 0
+        Dim TlValorBruto = 0.00, TlRetencionGarant = 0.00, TlAmortizacionAnticipo = 0.00, TlItbmsTotal = 0.00, TlRetencionItbms = 0.00, TlValorNetoPag = 0.00, TlOtros = 0.00, TlDevolucionRetGarant As String = 0.00
+        Dim CantidadPage As String
+
+        grvDesembolsosA.DataSource = Nothing
+        grvDesembolsosA.DataBind()
+
+        Dim IdContrato As String = TxtIdContrato.Text
+        Dim TipoDesembolso As String = "A"
+
+        dtDesembolso = IntJF.ListarDesembolsosExpElectronico(IdContrato, TipoDesembolso, lsIdentificador)
+
+        If dtDesembolso.Rows.Count > 0 Then
+            dvListadoDesembolsosA.Visible = True
+
+            For Each i In dtDesembolso.Rows
+                i.item("ValorBruto") = ConvertirAMoney(i.item("ValorBruto"))
+                i.item("RetencionGarant") = ConvertirAMoney(i.item("RetencionGarant"))
+                i.item("DevolucionRetGarant") = ConvertirAMoney(i.item("DevolucionRetGarant"))
+                i.item("AmortizacionAnticipo") = ConvertirAMoney(i.item("AmortizacionAnticipo"))
+                i.item("PorcentItbms") = ConvertirAMoney(i.item("PorcentItbms"))
+                i.item("ItbmsTotal") = ConvertirAMoney(i.item("ItbmsTotal"))
+                i.item("RetencionItbms") = ConvertirAMoney(i.item("RetencionItbms"))
+                i.item("Otros") = ConvertirAMoney(i.item("Otros"))
+                i.item("ValorNetoPag") = ConvertirAMoney(i.item("ValorNetoPag"))
+                TlValorBruto = CDec(TlValorBruto) + CDec(ConvertirAMoney(i.item("ValorBruto"), "0.00"))
+                TlRetencionGarant = CDec(TlRetencionGarant) + CDec(ConvertirAMoney(i.item("RetencionGarant"), "0.00"))
+                TlDevolucionRetGarant = CDec(TlDevolucionRetGarant) + CDec(ConvertirAMoney(i.item("DevolucionRetGarant"), "0.00"))
+                TlAmortizacionAnticipo = CDec(TlAmortizacionAnticipo) + CDec(ConvertirAMoney(i.item("AmortizacionAnticipo"), "0.00"))
+                TlItbmsTotal = CDec(TlItbmsTotal) + CDec(ConvertirAMoney(i.item("ItbmsTotal"), "0.00"))
+                TlRetencionItbms = CDec(TlRetencionItbms) + CDec(ConvertirAMoney(i.item("RetencionItbms"), "0.00"))
+                TlOtros = CDec(TlOtros) + CDec(ConvertirAMoney(i.item("Otros"), "0.00"))
+                TlValorNetoPag = CDec(TlValorNetoPag) + CDec(ConvertirAMoney(i.item("ValorNetoPag"), "0.00"))
+            Next
+
+            grvDesembolsosA.DataSource = dtDesembolso
+            grvDesembolsosA.DataBind()
+
+            For Each row In grvDesembolsosA.Rows
+                row.Cells(14).ToolTip = "Usuario Registra: " & grvDesembolsosA.DataKeys(contador)("UsuarioRegistra").ToString & Environment.NewLine &
+                                        "Fecha Registra: " & grvDesembolsosA.DataKeys(contador)("FechaRegistro").ToString & Environment.NewLine & "Usuario Modifica: " &
+                                        grvDesembolsosA.DataKeys(contador)("UsuarioModifica").ToString & Environment.NewLine & "Fecha Modifica: " &
+                                        grvDesembolsosA.DataKeys(contador)("FechaModifica").ToString
+                'row.Cells(18).ToolTip = "Presione para Editar este registro."
+                'row.Cells(19).ToolTip = "Presione para Eliminar este registro."
+                contador = contador + 1
+            Next
+            CantidadPage = grvDesembolsosA.PageCount - 1
+            If grvDesembolsosA.PageIndex = grvDesembolsosA.PageCount - 1 Then
+                grvDesembolsosA.FooterRow.Visible = True
+                grvDesembolsosA.FooterRow.Cells(2).Text = "TOTAL"
+                grvDesembolsosA.FooterRow.Cells(5).Text = ConvertirAMoney(TlValorBruto)
+                grvDesembolsosA.FooterRow.Cells(6).Text = ConvertirAMoney(TlRetencionGarant)
+                grvDesembolsosA.FooterRow.Cells(7).Text = ConvertirAMoney(TlDevolucionRetGarant)
+                grvDesembolsosA.FooterRow.Cells(8).Text = ConvertirAMoney(TlAmortizacionAnticipo)
+                grvDesembolsosA.FooterRow.Cells(9).Text = ConvertirAMoney(TlItbmsTotal)
+                grvDesembolsosA.FooterRow.Cells(10).Text = ConvertirAMoney(TlRetencionItbms)
+                grvDesembolsosA.FooterRow.Cells(11).Text = ConvertirAMoney(TlOtros)
+                grvDesembolsosA.FooterRow.Cells(12).Text = ConvertirAMoney(TlValorNetoPag)
+                grvDesembolsosA.FooterRow.Cells(2).Font.Bold = True
+                grvDesembolsosA.FooterRow.Cells(5).Font.Bold = True
+                grvDesembolsosA.FooterRow.Cells(6).Font.Bold = True
+                grvDesembolsosA.FooterRow.Cells(7).Font.Bold = True
+                grvDesembolsosA.FooterRow.Cells(8).Font.Bold = True
+                grvDesembolsosA.FooterRow.Cells(9).Font.Bold = True
+                grvDesembolsosA.FooterRow.Cells(10).Font.Bold = True
+                grvDesembolsosA.FooterRow.Cells(11).Font.Bold = True
+                grvDesembolsosA.FooterRow.Cells(12).Font.Bold = True
+            Else
+                grvDesembolsosA.FooterRow.Visible = False
+            End If
+
+            lblTituloGridDesembolsosA.Visible = True
+
+            If TipoDesembolso = "C" Then
+                txtMntIniCO.Text = dtDesembolso.Rows(0).Item("MontoInicial")
+                txtMntFConAdCO.Text = dtDesembolso.Rows(0).Item("MontoFinalConAd")
+                txtMntAntCO.Text = dtDesembolso.Rows(0).Item("MontoAnticipo")
+
+                txtMntFCO.Text = CDec(TlValorBruto) + CDec(TlItbmsTotal)
+                txtSldCO.Text = CDec(txtMntFConAdCO.Text) - CDec(txtMntFCO.Text)
+                txtSldRetxPgCO.Text = CDec(TlRetencionGarant) - CDec(TlDevolucionRetGarant)
+                txtSldAntCO.Text = CDec(txtMntAntCO.Text) - CDec(TlAmortizacionAnticipo)
+            ElseIf TipoDesembolso = "A" Then
+                txtMntIniCA.Text = dtDesembolso.Rows(0).Item("MontoInicial")
+                txtMntFConAdCA.Text = dtDesembolso.Rows(0).Item("MontoFinalConAd")
+                txtMntAntCA.Text = dtDesembolso.Rows(0).Item("MontoAnticipo")
+
+                txtMntFCA.Text = CDec(TlValorBruto) + CDec(TlItbmsTotal)
+                txtSldCA.Text = CDec(txtMntFConAdCA.Text) - CDec(txtMntFCA.Text)
+                txtSldRetxPgCA.Text = CDec(TlRetencionGarant) - CDec(TlDevolucionRetGarant)
+                txtSldAntCA.Text = CDec(txtMntAntCA.Text) - CDec(TlAmortizacionAnticipo)
+            End If
+        Else
+            Funciones.ModalNotificacion("MSG-D03")
+            lblTituloGridDesembolsosA.Visible = False
+            dvListadoDesembolsosA.Visible = False
+            mvSalDes.ActiveViewIndex = -1
+        End If
+    End Sub
+
+    Private Sub ConsultarSaldoDelProyecto()
+        Dim dtSaldo As New DataTable
+        Dim IdContrato As String = TxtIdContrato.Text
+        LimpiarCamposSaldo()
+        dtSaldo = IntJF.ConsultarSaldoDelProyecto(IdContrato, lsIdentificador)
+        If dtSaldo.Rows.Count > 0 Then
+            txtMntIniContObraSld.Text = dtSaldo.Rows(0).Item("MntIniContObra")
+            txtMntFinProyecto.Text = dtSaldo.Rows(0).Item("MntFinalDelProyecto")
+
+            txtTlFacObra.Text = dtSaldo.Rows(0).Item("TlFacObra")
+            txtTlFacInspec.Text = dtSaldo.Rows(0).Item("TlFacInsp")
+            txtTlFacConsult.Text = dtSaldo.Rows(0).Item("TlFacConsult")
+            txtTlFacFi.Text = dtSaldo.Rows(0).Item("TlFacFinanci")
+            txtOtrosMontos.Text = dtSaldo.Rows(0).Item("OtrosMontos")
+            txtTotalFacturado.Text = dtSaldo.Rows(0).Item("TlFacturadoDelProyecto")
+
+            txtTlFacturadoFI.Text = dtSaldo.Rows(0).Item("TlFacturadoDelProyecto")
+            txtSaldodelProyecto.Text = dtSaldo.Rows(0).Item("SaldoProyecto")
+        Else
+            Funciones.ModalNotificacion("ERROR1")
+        End If
+    End Sub
+
+    Private Sub LimpiarCamposSaldo()
+        txtMntIniContObraSld.Text = ""
+        txtMntFinProyecto.Text = ""
+        txtMntFinProyecto.ForeColor = Drawing.Color.FromArgb(66, 139, 202)
+        txtTlFacObra.Text = ""
+        txtTlFacInspec.Text = ""
+        txtTlFacConsult.Text = ""
+        txtTlFacFi.Text = ""
+        txtOtrosMontos.Text = ""
+        txtTotalFacturado.Text = ""
+
+        txtTlFacturadoFI.Text = ""
+        txtSaldodelProyecto.Text = ""
+    End Sub
+
+    Private Sub grvDesembolsosC_PageIndexChanging(sender As Object, e As GridViewPageEventArgs) Handles grvDesembolsosC.PageIndexChanging
+        dvNumConM.Visible = True
+        grvDesembolsosC.PageIndex = e.NewPageIndex
+        CargarDesembolsosBusquedaC()
+    End Sub
+
+    Private Sub grvDesembolsosA_PageIndexChanging(sender As Object, e As GridViewPageEventArgs) Handles grvDesembolsosA.PageIndexChanging
+        dvNumConM.Visible = True
+        grvDesembolsosA.PageIndex = e.NewPageIndex
+        CargarDesembolsosBusquedaA()
+    End Sub
+
+#End Region
+
+#Region "VisitaEvaluacion"
+    Private Sub tapVisitaEval_Click(sender As Object, e As EventArgs) Handles tapVisitaEval.Click
+        dvNumConM.Visible = True
+        mvExpediente.ActiveViewIndex = 8
+        mvVisEva.ActiveViewIndex = -1
+        navtapVisita.Attributes.Remove("class")
+        navtapEvaFin.Attributes.Remove("class")
+        navtapFinReg.Attributes.Remove("class")
+
+        AsignarClaseActiva(navtapVisitaEval)
+    End Sub
+
+    Private Sub tapVisita_Click(sender As Object, e As EventArgs) Handles tapVisita.Click
+        dvNumConM.Visible = True
+        mvVisEva.ActiveViewIndex = 0
+        navtapVisita.Attributes.Add("class", "active")
+        navtapEvaFin.Attributes.Remove("class")
+        navtapFinReg.Attributes.Remove("class")
+
+        LlenarGridVisitas()
+    End Sub
+
+    Private Sub tapEvaFin_Click(sender As Object, e As EventArgs) Handles tapEvaFin.Click
+        dvNumConM.Visible = True
+        mvVisEva.ActiveViewIndex = 1
+        navtapEvaFin.Attributes.Add("class", "active")
+        navtapVisita.Attributes.Remove("class")
+        navtapFinReg.Attributes.Remove("class")
+
+        LlenarGridEvaluaciones()
+    End Sub
+
+    Private Sub tapFinReg_Click(sender As Object, e As EventArgs) Handles tapFinReg.Click
+        dvNumConM.Visible = True
+        mvVisEva.ActiveViewIndex = 2
+        navtapFinReg.Attributes.Add("class", "active")
+        navtapEvaFin.Attributes.Remove("class")
+        navtapVisita.Attributes.Remove("class")
+
+        LlenarGridFinRegistro()
+    End Sub
+
+    Private Sub LlenarGridVisitas()
+        Dim lsIdentificador As String = Funciones.GetUsuarioIdentificador
+        Dim contador As Integer = 0
+        Dim dt As New DataTable
+        ViewState("dtSort") = New DataTable
+        grvVistas.DataSource = Nothing
+        grvVistas.DataBind()
+
+        dt = IntTC.ConsultarVisitas(TxtIdContrato.Text, lsIdentificador)
+
+        If dt.Rows.Count > 0 Then
+            If Not IsNumeric(dt(0)(0)) Then
+                Funciones.ModalNotificacion("ERROR1")
+                lblTituloGridVisitas.Visible = False
+            Else
+                grvVistas.DataSource = dt
+                grvVistas.DataBind()
+
+                ViewState("dtSort") = dt
+
+                For Each row In grvVistas.Rows
+                    row.Cells(4).ToolTip = "Usuario Registra: " & grvVistas.DataKeys(contador)("UsuarioRegistra").ToString & Environment.NewLine &
+                                            "Fecha Registra: " & grvVistas.DataKeys(contador)("FechaRegistro").ToString & Environment.NewLine & "Usuario Modifica: " &
+                                            grvVistas.DataKeys(contador)("UsuarioModifica").ToString & Environment.NewLine & "Fecha Modifica: " &
+                                            grvVistas.DataKeys(contador)("FechaModifica").ToString
+
+                    'row.Cells(6).ToolTip = "Presione si desea editar"
+                    'row.Cells(7).ToolTip = "Presione si desea eliminar"
+
+                    contador = contador + 1
+                Next
+
+                lblTituloGridVisitas.Visible = True
+                LblNoVisitas.Visible = False
+
+            End If
+        Else
+            lblTituloGridVisitas.Visible = False
+            LblNoVisitas.Visible = True
+        End If
+
+    End Sub
+
+    Private Sub LlenarGridEvaluaciones()
+        Dim lsIdentificador As String = Funciones.GetUsuarioIdentificador
+        Dim contador As Integer = 0
+        Dim dt As New DataTable
+        ViewState("dtSortEva") = New DataTable
+        grvEvaFinal.DataSource = Nothing
+        grvEvaFinal.DataBind()
+
+        dt = IntTC.ConsultarEvaluacionesFinales(TxtIdContrato.Text, lsIdentificador)
+
+        If dt.Rows.Count > 0 Then
+            If Not IsNumeric(dt(0)(0)) Then
+                Funciones.ModalNotificacion("ERROR1")
+                lblTituloGridEvaFinal.Visible = False
+            Else
+                grvEvaFinal.DataSource = dt
+                grvEvaFinal.DataBind()
+                ViewState("dtSortEva") = dt
+
+                For Each row In grvEvaFinal.Rows
+                    row.Cells(3).ToolTip = "Usuario Registra: " & grvEvaFinal.DataKeys(contador)("UsuarioRegistra").ToString & Environment.NewLine &
+                                            "Fecha Registra: " & grvEvaFinal.DataKeys(contador)("FechaRegistro").ToString & Environment.NewLine & "Usuario Modifica: " &
+                                            grvEvaFinal.DataKeys(contador)("UsuarioModifica").ToString & Environment.NewLine & "Fecha Modifica: " &
+                                            grvEvaFinal.DataKeys(contador)("FechaModifica").ToString
+
+                    'row.Cells(4).ToolTip = "Presione si desea editar"
+                    'row.Cells(5).ToolTip = "Presione si desea eliminar"
+
+                    contador = contador + 1
+                Next
+
+                'HabilitarTabs(liTabFinRegistro, True)
+                lblTituloGridEvaFinal.Visible = True
+                LblNoEvalVisiEval.Visible = False
+                'LlenarGridFinRegistro()
+
+            End If
+        Else
+            'HabilitarTabs(liTabFinRegistro, False)
+            lblTituloGridEvaFinal.Visible = False
+            LblNoEvalVisiEval.Visible = True
+        End If
+    End Sub
+
+    Private Sub LlenarGridFinRegistro()
+        Dim lsIdentificador As String = Funciones.GetUsuarioIdentificador
+        Dim contador As Integer = 0
+        Dim dt As New DataTable
+        ViewState("dtSortFinReg") = New DataTable
+        grvFinRegistro.DataSource = Nothing
+        grvFinRegistro.DataBind()
+
+        dt = IntTC.ConsultarFinRegistro(TxtIdContrato.Text, lsIdentificador)
+
+        If dt.Rows.Count > 0 Then
+            If Not IsNumeric(dt(0)(0)) Then
+                Funciones.ModalNotificacion("ERROR1")
+                lblTituloGridFinReg.Visible = False
+            Else
+                grvFinRegistro.DataSource = dt
+                grvFinRegistro.DataBind()
+
+                ViewState("dtSortFinReg") = dt
+
+                For Each row In grvFinRegistro.Rows
+                    row.Cells(3).ToolTip = "Usuario Registra: " & grvFinRegistro.DataKeys(contador)("UsuarioRegistra").ToString & Environment.NewLine &
+                                            "Fecha Registra: " & grvFinRegistro.DataKeys(contador)("FechaRegistro").ToString & Environment.NewLine & "Usuario Modifica: " &
+                                            grvFinRegistro.DataKeys(contador)("UsuarioModifica").ToString & Environment.NewLine & "Fecha Modifica: " &
+                                            grvFinRegistro.DataKeys(contador)("FechaModifica").ToString
+
+                    'row.Cells(4).ToolTip = "Presione si desea editar"
+                    'row.Cells(5).ToolTip = "Presione si desea eliminar"
+
+                    contador = contador + 1
+                Next
+                lblTituloGridFinReg.Visible = True
+                LblDatFinVisiEval.Visible = False
+            End If
+        Else
+            lblTituloGridFinReg.Visible = False
+            LblDatFinVisiEval.Visible = True
+        End If
+
+    End Sub
+
+    Private Sub grvVistas_RowCommand(sender As Object, e As GridViewCommandEventArgs) Handles grvVistas.RowCommand
+        Dim rowIndex As Integer
+        Dim id As String = ""
+
+        If IsNumeric(e.CommandArgument) Then
+            rowIndex = Convert.ToInt32(e.CommandArgument)
+            If (e.CommandName = "SelectAdju") Then
+                If Session("activoDW") = "S" Then
+                    Dim ruta As String = ""
+                    ruta = ConsultarRutaAdjuntoVisita(TxtIdContrato.Text, txtNumConM.Text, grvVistas.DataKeys(rowIndex)("IdVisita").ToString()) 'txtNumContrato_TabVisitas capturar en cargar contrato
+
+                    If ruta <> "" Then
+                        CargarURL(ruta)
+                    Else
+                        Funciones.ModalNotificacion("ADJ1")
+                    End If
+
+                Else
+                    Funciones.ModalNotificacion("ADJ2")
+                End If
+
+            ElseIf (e.CommandName = "Comentario") Then
+                While rowIndex > 9
+                    rowIndex = rowIndex - 10
+                End While
+                Dim Comentario As String = grvVistas.DataKeys(rowIndex)("ComentariosCompleto").ToString()
+                Comentario = Comentario.Replace("'", "¨")
+                Comentario = Comentario.Replace(vbLf&, " ")
+                Funciones.ModalAlert2(Comentario)
+            End If
+        Else
+            Dim TipoOpe As String = e.CommandName
+            If (TipoOpe = "OrdenaFecha") Then
+                ValidarTipoSortVisita("Secuencia")
+            End If
+        End If
+    End Sub
+
+    Private Sub ValidarTipoSortVisita(ByVal TipoOpe As String)
+        Dim contador As Integer = 0
+        If Not hd_ValorOrdena.Text = TipoOpe Then
+            hd_SortDir.Text = "ASC"
+            hd_ValorOrdena.Text = TipoOpe
+        Else
+            If hd_SortDir.Text = "ASC" Then
+                hd_SortDir.Text = "DESC"
+            Else
+                hd_SortDir.Text = "ASC"
+            End If
+        End If
+        Dim dtSort As DataTable = DirectCast(ViewState("dtSort"), DataTable)
+        dtSort.DefaultView.Sort = hd_ValorOrdena.Text + " " + hd_SortDir.Text
+
+        grvVistas.DataSource = dtSort
+        grvVistas.DataBind()
+
+        For Each row In grvVistas.Rows
+            row.Cells(4).ToolTip = "Usuario Registra: " & grvVistas.DataKeys(contador)("UsuarioRegistra").ToString & Environment.NewLine &
+                                            "Fecha Registra: " & grvVistas.DataKeys(contador)("FechaRegistro").ToString & Environment.NewLine & "Usuario Modifica: " &
+                                            grvVistas.DataKeys(contador)("UsuarioModifica").ToString & Environment.NewLine & "Fecha Modifica: " &
+                                            grvVistas.DataKeys(contador)("FechaModifica").ToString
+
+            'row.Cells(6).ToolTip = "Presione si desea editar"
+            'row.Cells(7).ToolTip = "Presione si desea eliminar"
+
+            contador = contador + 1
+        Next
+
+    End Sub
+
+    Private Sub ValidarTipoSortEvaluacion(ByVal TipoOpe As String)
+        Dim contador As Integer = 0
+        If Not hd_ValorOrdena.Text = TipoOpe Then
+            hd_SortDir.Text = "ASC"
+            hd_ValorOrdena.Text = TipoOpe
+        Else
+            If hd_SortDir.Text = "ASC" Then
+                hd_SortDir.Text = "DESC"
+            Else
+                hd_SortDir.Text = "ASC"
+            End If
+        End If
+        Dim dtSortEva As DataTable = DirectCast(ViewState("dtSortEva"), DataTable)
+        dtSortEva.DefaultView.Sort = hd_ValorOrdena.Text + " " + hd_SortDir.Text
+
+        grvEvaFinal.DataSource = dtSortEva
+        grvEvaFinal.DataBind()
+
+        For Each row In grvEvaFinal.Rows
+            row.Cells(3).ToolTip = "Usuario Registra: " & grvEvaFinal.DataKeys(contador)("UsuarioRegistra").ToString & Environment.NewLine &
+                                            "Fecha Registra: " & grvEvaFinal.DataKeys(contador)("FechaRegistro").ToString & Environment.NewLine & "Usuario Modifica: " &
+                                            grvEvaFinal.DataKeys(contador)("UsuarioModifica").ToString & Environment.NewLine & "Fecha Modifica: " &
+                                            grvEvaFinal.DataKeys(contador)("FechaModifica").ToString
+
+            'row.Cells(4).ToolTip = "Presione si desea editar"
+            'row.Cells(5).ToolTip = "Presione si desea eliminar"
+
+            contador = contador + 1
+        Next
+    End Sub
+
+    Private Sub grvEvaFinal_RowCommand(sender As Object, e As GridViewCommandEventArgs) Handles grvEvaFinal.RowCommand
+        Dim rowIndex As Integer
+        Dim id As String = ""
+        If IsNumeric(e.CommandArgument) Then
+            rowIndex = Convert.ToInt32(e.CommandArgument)
+            'If (e.CommandName = "SelectEdit") Then
+            '    hdIdEvaluacion.Text = grvEvaFinal.DataKeys(rowIndex)("IdEvaluacion").ToString()
+            '    txtFechaEvaluacion.Text = grvEvaFinal.DataKeys(rowIndex)("FechaEvaluacion").ToString()
+            '    hdFechaEvaluacionAnterior.Text = grvEvaFinal.DataKeys(rowIndex)("FechaEvaluacion").ToString()
+            '    txtResultadoEvaluacion.Text = grvEvaFinal.DataKeys(rowIndex)("ResultadoFinalCompleto").ToString()
+            '    CambioPantallaEvaluacion(1)
+            '    btnGuardarEvaluacion.InnerText = "Actualizar"
+            'ElseIf (e.CommandName = "SelectEliminar") Then
+            '    id = grvEvaFinal.DataKeys(rowIndex)("IdEvaluacion").ToString()
+            '    Funciones.ModalConfirmCodeBehind("¿Desea eliminar este registro?", False, id, "eliminaEvaFinal")
+            'End If
+            If (e.CommandName = "Comentario") Then
+                While rowIndex > 9
+                    rowIndex = rowIndex - 10
+                End While
+                Dim Comentario As String = grvEvaFinal.DataKeys(rowIndex)("ResultadoFinalCompleto").ToString()
+                Comentario = Comentario.Replace("'", "¨")
+                Comentario = Comentario.Replace(vbLf&, " ")
+                Funciones.ModalAlert2(Comentario)
+            End If
+
+        Else
+            Dim TipoOpe As String = e.CommandName
+            If (TipoOpe = "OrdenaFecha") Then
+                ValidarTipoSortEvaluacion("Secuencia")
+            End If
+        End If
+    End Sub
+
+    Private Sub ValidarTipoSortFinRegistro(ByVal TipoOpe As String)
+        Dim contador As Integer = 0
+        If Not hd_ValorOrdena.Text = TipoOpe Then
+            hd_SortDir.Text = "ASC"
+            hd_ValorOrdena.Text = TipoOpe
+        Else
+            If hd_SortDir.Text = "ASC" Then
+                hd_SortDir.Text = "DESC"
+            Else
+                hd_SortDir.Text = "ASC"
+            End If
+        End If
+
+        Dim dtSortFinReg As DataTable = DirectCast(ViewState("dtSortFinReg"), DataTable)
+        dtSortFinReg.DefaultView.Sort = hd_ValorOrdena.Text + " " + hd_SortDir.Text
+
+        grvFinRegistro.DataSource = dtSortFinReg
+        grvFinRegistro.DataBind()
+
+        For Each row In grvFinRegistro.Rows
+            row.Cells(3).ToolTip = "Usuario Registra: " & grvFinRegistro.DataKeys(contador)("UsuarioRegistra").ToString & Environment.NewLine &
+                                            "Fecha Registra: " & grvFinRegistro.DataKeys(contador)("FechaRegistro").ToString & Environment.NewLine & "Usuario Modifica: " &
+                                            grvFinRegistro.DataKeys(contador)("UsuarioModifica").ToString & Environment.NewLine & "Fecha Modifica: " &
+                                            grvFinRegistro.DataKeys(contador)("FechaModifica").ToString
+
+            'row.Cells(4).ToolTip = "Presione si desea editar"
+            'row.Cells(5).ToolTip = "Presione si desea eliminar"
+
+            contador = contador + 1
+        Next
+    End Sub
+
+    Private Sub grvFinRegistro_RowCommand(sender As Object, e As GridViewCommandEventArgs) Handles grvFinRegistro.RowCommand
+        Dim rowIndex As Integer
+        Dim id As String = ""
+        If IsNumeric(e.CommandArgument) Then
+            rowIndex = Convert.ToInt32(e.CommandArgument)
+            'If (e.CommandName = "SelectEdit") Then
+            '    hdIdFinRegistro.Text = grvFinRegistro.DataKeys(rowIndex)("IdFinRegistro").ToString()
+            '    txtFechaEnvio.Text = grvFinRegistro.DataKeys(rowIndex)("FechaEnvio").ToString()
+            '    hdFechaFinRegAnterior.Text = grvFinRegistro.DataKeys(rowIndex)("FechaEnvio").ToString()
+            '    txtObservacionAuditor.Text = grvFinRegistro.DataKeys(rowIndex)("ObservacionCompleto").ToString()
+            '    CambiarPantallaFinRegistro(1)
+            '    btnGuardarFinReg.InnerText = "Actualizar"
+            'ElseIf (e.CommandName = "SelectEliminar") Then
+            '    id = grvFinRegistro.DataKeys(rowIndex)("IdFinRegistro").ToString()
+            '    Funciones.ModalConfirmCodeBehind("¿Desea eliminar este registro?", False, id, "eliminaFinReg")
+            'End If
+            If (e.CommandName = "Comentario") Then
+                While rowIndex > 9
+                    rowIndex = rowIndex - 10
+                End While
+                Dim Comentario As String = grvFinRegistro.DataKeys(rowIndex)("ObservacionCompleto").ToString()
+                Comentario = Comentario.Replace("'", "¨")
+                Comentario = Comentario.Replace(vbLf&, " ")
+                Funciones.ModalAlert2(Comentario)
+            End If
+        Else
+            Dim TipoOpe As String = e.CommandName
+            If (TipoOpe = "OrdenaFecha") Then
+                ValidarTipoSortFinRegistro("Secuencia")
+            End If
+        End If
+    End Sub
+
+    Private Function ConsultarRutaAdjuntoVisita(ByVal idContrato As String, ByVal numContrato As String, ByVal idVisita As String) As String
+        Dim adjunto As String = ""
+        Dim nombreArchivo As String = ""
+        Dim url As String = ""
+        adjunto = ConsultarArchivoDocuwareVisita(idContrato, numContrato, idVisita)
+
+        If adjunto <> "sinAdjunto" Then
+            If adjunto <> "errorAdjunto" Then
+                url = adjunto
+            End If
+        End If
+        Return url
+    End Function
+
+    Private Sub CargarURL(ByVal url As String)
+        Dim lsIdentificador As String = Funciones.GetUsuarioIdentificador
+        Try
+            ClientScript.RegisterClientScriptBlock(Page.GetType(), "cargarURL", "window.open('" & url & "', '_blank');", True)
+        Catch ex As Exception
+            Funciones.ModalNotificacion("ADJ1")
+            IntTC.RegistrarError(lsIdentificador, "CargarURL FormVisitas", ex.Message, ex.StackTrace)
+        End Try
+
+    End Sub
+
+    Private Function ConsultarArchivoDocuwareVisita(idContrato As String, numContrato As String, idVisita As Integer)
+
+        Dim lsIdentificador As String = Funciones.GetUsuarioIdentificador
+
+        Dim stateArray As New ArrayList
+        Dim strRespuesta As String
+        Dim urlAdjunto As String = ""
+
+        'Dim parametros As String = "IDACTA"
+        'Dim parametros As String = "IDCONTRATO|IDVISITA|NUMCONTRATO"
+
+        'Dim valores As String = String.Format("{0}", idActa)
+        'Dim valores As String = String.Format("{0}|{1}|{2}", idContrato, idVisita, numContrato)
+
+
+        Dim parametros As String = "IDCONTRATO|IDVISITA"
+        Dim valores As String = String.Format("{0}|{1}", idContrato, idVisita)
+
+        ' columnas que regresa
+        Dim indices As String = "IDCONTRATO|NUMCONTRATO|IDVISITA|USUARIOADJUNTA|FECHA_ADJUNTO|SUBSERV"
+
+        Dim appSettings = ConfigurationManager.AppSettings
+        Dim strInstitucion As String = appSettings.Get("INSTITUCION")
+        Dim strOperacion As String = appSettings.Get("OPERQUERY_EVAL")
+        'Dim usuarioDW As String = appSettings.Get("USUARIODWLOAD")
+        Dim usuarioDW As String = appSettings.Get("USUARIOUPLOAD")
+
+        Try
+            Dim dwInt As dwIntegrador.IdwIntegratorClient = New dwIntegrador.IdwIntegratorClient()
+            strRespuesta = dwInt.enviarOperacionDW("EXTERNA", strInstitucion, usuarioDW, strOperacion, parametros, valores, indices, "")
+
+            If Not String.IsNullOrEmpty(strRespuesta) Then
+                If strRespuesta.Substring(0, 5) <> "ERROR" Then
+                    strRespuesta = strRespuesta.Remove(strRespuesta.Length - 1, 1)
+                    strRespuesta = strRespuesta.Remove(strRespuesta.Length - 1, 1)
+                    Dim campos As String() = strRespuesta.Split("|")
+                    Dim idDOc As String() = campos(0).Split("=")
+                    Dim link As String = CrearLink(idDOc(1))
+                    Dim idActaStr As String() = campos(3).Split("=")
+                    'Dim link As String = CrearLink(idActaStr(1))
+
+                    hd_DWDocID.Text = idDOc(1) 'Variable Oculta para almacenar el DWDOCID que identifica el documento adjunto en DocuWare
+
+                    If link.Substring(0, 5) <> "ERROR" Then
+                        urlAdjunto = link
+                    Else
+                        urlAdjunto = "errorAdjunto"
+                    End If
+
+                Else
+                    urlAdjunto = "errorAdjunto"
+                    hd_DWDocID.Text = ""
+                End If
+            Else
+                Dim dt As DataTable
+                dt = IntTC.ActualizarVisitaDocumentoAdjunto(idVisita, "N", lsIdentificador) 'Se valida docu,ento, sino existe se actualiza db 
+                hd_DWDocID.Text = ""
+                urlAdjunto = "sinAdjunto"
+            End If
+        Catch ex As Exception
+            IntTC.RegistrarError(lsIdentificador, "ConsultarArchivoDocuwareVisita", ex.Message, ex.StackTrace)
+        End Try
+
+
+        Return urlAdjunto
+
+    End Function
+
+    Private Function CrearLink(ByVal id As String) As String
+        Dim strRespuesta As String = ""
+        Dim lsIdentificador As String = Funciones.GetUsuarioIdentificador
+        Dim appSettings = ConfigurationManager.AppSettings
+        Dim strInstitucion As String = appSettings.Get("INSTITUCION")
+        Dim strOperacion As String = appSettings.Get("OPERDWLOAD")
+        'Dim usuarioDW As String = appSettings.Get("USUARIODWLOAD")
+        Dim usuarioDW As String = appSettings.Get("USUARIOUPLOAD")
+
+        Try
+            '' Crea instancia del webservice en memoria
+            Dim dwInt As dwIntegrador.IdwIntegratorClient = New dwIntegrador.IdwIntegratorClient()
+            strRespuesta = dwInt.enviarOperacionDW("EXTERNA", strInstitucion, usuarioDW, strOperacion, "", "", "", id)
+
+            'strRespuesta = dwInt.enviarOperacionDW("INTERNA", strInstitucion, usuarioDW, "URL_EPOP", "idacta", id, "", "")
+        Catch ex As Exception
+            IntTC.RegistrarError(lsIdentificador, "CrearLink form Visitas", ex.Message, ex.StackTrace)
+        End Try
+
+        Return strRespuesta
+    End Function
+
+    Private Sub grvVistas_PageIndexChanging(sender As Object, e As GridViewPageEventArgs) Handles grvVistas.PageIndexChanging
+        dvNumConM.Visible = True
+        grvVistas.PageIndex = e.NewPageIndex
+        LlenarGridVisitas()
+    End Sub
+
+    Private Sub grvEvaFinal_PageIndexChanging(sender As Object, e As GridViewPageEventArgs) Handles grvEvaFinal.PageIndexChanging
+        dvNumConM.Visible = True
+        grvEvaFinal.PageIndex = e.NewPageIndex
+        LlenarGridEvaluaciones()
+    End Sub
+
+    Private Sub grvFinRegistro_PageIndexChanging(sender As Object, e As GridViewPageEventArgs) Handles grvFinRegistro.PageIndexChanging
+        dvNumConM.Visible = True
+        grvFinRegistro.PageIndex = e.NewPageIndex
+        LlenarGridFinRegistro()
+    End Sub
+
+#End Region
+
+#Region "Actas"
+    Private Sub tapActas_Click(sender As Object, e As EventArgs) Handles tapActas.Click
+        'dvNumConM.Visible = False
+
+        mvExpediente.ActiveViewIndex = 6
+
+        AsignarClaseActiva(navtapActas)
+        ddlTipoActas.Items.Clear()
+        LlenarGridActa(0)
+
+        Dim dtTipo As New DataTable
+        dtTipo = IntTC.ListarTipoActas(lsIdentificador)
+        ddlTipoActas.Items.Add(New ListItem("--Todas--", "0"))
+        For Each r As DataRow In dtTipo.Rows
+            ddlTipoActas.Items.Add(New ListItem(r.Item("Descripcion"), r.Item("IdTipoActa")))
+        Next
+    End Sub
+
+    Private Sub gvActas_PageIndexChanging(sender As Object, e As GridViewPageEventArgs) Handles gvActas.PageIndexChanging
+        'dvNumConM.Visible = False
+        gvActas.PageIndex = e.NewPageIndex
+        LlenarGridActa(ddlTipoActas.SelectedValue)
+    End Sub
+
+    'Private Sub IrActas(ByVal IdContrato As String)
+    '    Dim dtActas = New DataTable
+    '    Dim dtTipo As New DataTable
+    '    Dim IdTipo As Integer
+    '    Dim contador As Integer = 0
+    '    Dim i As Integer = 0
+
+    '    dtActas = IntTC.ConsultarActa(IdTipo, TxtIdContrato.Text, lsIdentificador)
+
+    '    ddlTipoActas.Items.Clear()
+
+    '    dtTipo = IntTC.ListarTipoActas(lsIdentificador)
+    '    ddlTipoActas.Items.Add("--Todas--")
+
+    '    If dtActas.Rows.Count > 0 Then
+    '        gvActas.Visible = True
+    '        gvActas.DataSource = dtActas
+    '        gvActas.DataBind()
+    '        gvActas.HeaderRow.TableSection = TableRowSection.TableHeader
+    '        For Each row In gvActas.Rows
+    '            'row.Cells(9).ToolTip = "Presione para ver el archivo adjunto"
+    '            contador = contador + 1
+    '        Next
+    '        For Each r As DataRow In dtTipo.Rows
+    '            ddlTipoActas.Items.Add(New ListItem(r.Item("Descripcion"), r.Item("IdTipoActa")))
+    '        Next
+    '    End If
+    '    gvActas.Visible = True
+    '    LblNoTipoActas.Visible = False
+    'End Sub
+
+    Private Sub gvActas_RowDataBound(sender As Object, e As GridViewRowEventArgs) Handles gvActas.RowDataBound
+        If e.Row.RowType = DataControlRowType.DataRow Then
+            Dim index As Integer = e.Row.RowIndex
+            Dim Secuencia As Integer = gvActas.DataKeys(index)("Secuencia")
+            Dim TipoActa As String = gvActas.DataKeys(index)("DescripcionTipoActa")
+            Dim NumeroActa As String = gvActas.DataKeys(index)("NumeroActa")
+            Dim FechaRecepcion As String = gvActas.DataKeys(index)("FechaRecepcion")
+            Dim PorcentajeActa As String = gvActas.DataKeys(index)("Porcentaje")
+            Dim FechaRegistro As String = gvActas.DataKeys(index)("FechaRegistro")
+            Dim MontoActa As String = gvActas.DataKeys(index)("Monto")
+            Dim ObservacionActa As String = gvActas.DataKeys(index)("Observacion")
+            Dim UsuarioRegistra As String = gvActas.DataKeys(index)("UsuarioRegistra")
+            Dim UsuarioModifica As String = gvActas.DataKeys(index)("UsuarioModifica")
+            Dim FechaModifica As String = gvActas.DataKeys(index)("FechaModifica")
+            Dim Adjunto As String = gvActas.DataKeys(index)("Adjunto")
+
+            Dim LblSec As Label = e.Row.FindControl("grvLblSecActa")
+            Dim LblTipoActa As Label = e.Row.FindControl("grvLblTipoActa")
+            Dim LblNumeroActa As Label = e.Row.FindControl("grvLblNumActa")
+            Dim LblFechaRecepcion As Label = e.Row.FindControl("grvLblFecRec")
+            Dim LblPorcentajeActa As Label = e.Row.FindControl("grvLblPorRec")
+            Dim LblFecRegActa As Label = e.Row.FindControl("grvLblFecRegActa")
+            Dim lblMontoActa As Label = e.Row.FindControl("grvLblMontoActa")
+            Dim lblObsActa As Label = e.Row.FindControl("grvLblObsActa")
+            Dim lblUsuRegActa As Label = e.Row.FindControl("grvLblUsuRegActa")
+
+            LblSec.Text = Secuencia
+            LblTipoActa.Text = TipoActa
+            LblNumeroActa.Text = NumeroActa
+            LblFechaRecepcion.Text = FechaRecepcion
+            LblPorcentajeActa.Text = PorcentajeActa
+            LblFecRegActa.Text = FechaRegistro
+            lblMontoActa.Text = ConvertirAMoney(MontoActa)
+            lblObsActa.Text = ObservacionActa
+            lblUsuRegActa.Text = UsuarioRegistra
+
+            lblUsuRegActa.ToolTip = "Usuario Registra: " & UsuarioRegistra & Environment.NewLine &
+                                   "Fecha Registra: " & FechaRegistro & Environment.NewLine &
+                                   "Usuario Modifica: " & UsuarioModifica & Environment.NewLine &
+                                   "Fecha Modifica: " & FechaModifica
+        Else
+            gvActas.Visible = True
+        End If
+    End Sub
+
+    Private Sub ddlTipoActas_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ddlTipoActas.SelectedIndexChanged
+        Dim dtActas = New DataTable
+        'Dim dtTipo As New DataTable
+        Dim IdTipo As Integer
+        'Dim contador As Integer = 0
+
+        If ddlTipoActas.SelectedValue = "--Todas--" Then
+            IrA_Actas()
+        Else
+            IdTipo = ddlTipoActas.SelectedValue
+            LlenarGridActa(IdTipo)
+            'dtActas = IntTC.ConsultarActa(IdTipo, TxtIdContrato.Text, lsIdentificador)
+
+            'If dtActas.Rows.Count > 0 Then
+            '    LblNoTipoActas.Visible = False
+            '    gvActas.Visible = True
+            '    gvActas.DataSource = dtActas
+            '    gvActas.DataBind()
+            '    gvActas.HeaderRow.TableSection = TableRowSection.TableHeader
+            '    'For Each row In gvActas.Rows
+            '    '    'row.Cells(9).ToolTip = "Presione para ver el archivo adjunto"
+            '    '    contador = contador + 1
+            '    'Next
+            'Else
+            '    LblNoTipoActas.Visible = True
+            '    LblTituloActas.Visible = False
+            '    gvActas.Visible = False
+            'End If
+        End If
+    End Sub
+
+    Private Sub IrA_Actas()
+        'MultiView1.SetActiveView(viewActas)
+        'AsignarClaseActiva(liTabActas, dvActas)
+        'ListarTipoActas()
+        'Dim cls As String
+        'Dim newCls As String
+        'cls = dvConsultaActa.Attributes("class")
+        'newCls = cls.Replace("Oculto", "")
+        'dvConsultaActa.Attributes("class") = newCls
+
+        'dvRegActas.Attributes.Add("class", "Oculto")
+        LlenarGridActa(0)
+    End Sub
+
+    Private Sub LlenarGridActa(ByVal idTipo As String)
+        Dim lsIdentificador As String = Funciones.GetUsuarioIdentificador
+        Dim dtActa As New DataTable
+        Dim dr As DataRow
+        Dim contador As Integer = 0
+
+        gvActas.DataSource = Nothing
+        gvActas.DataBind()
+
+        dtActa = IntTC.ConsultarActa(idTipo, TxtIdContrato.Text, lsIdentificador)
+
+        If dtActa.Rows.Count > 0 Then
+            If Not IsNumeric(dtActa(0)(0)) Then
+                Funciones.ModalNotificacion("ERROR1")
+                LblTituloActas.Visible = False
+            Else
+
+                For i = 0 To dtActa.Rows.Count - 1
+                    dr = dtActa.Rows(i)
+                    If dr.Item("FechaRecepcion") = "01 Ene 1900" Then
+                        dr.Item("FechaRecepcion") = ""
+                    End If
+
+                    If dr.Item("Porcentaje") = "0" Then
+                        dr.Item("Porcentaje") = ""
+                    Else
+                        dr.Item("Porcentaje") = CDec(dr.Item("Porcentaje")).ToString("####0.00")
+                    End If
+
+                    If dr.Item("Monto") = "0.00" Then
+                        dr.Item("Monto") = ""
+                    End If
+
+                Next
+
+                gvActas.DataSource = dtActa
+                gvActas.DataBind()
+                LblTituloActas.Visible = True
+
+                For Each row In gvActas.Rows
+                    row.Cells(9).ToolTip = "Presione si desea ver el archivo adjunto"
+                    'row.Cells(13).ToolTip = "Presione si desea editar"
+                    'row.Cells(14).ToolTip = "Presione si desea eliminar"
+                    row.Cells(8).ToolTip = "Usuario Registra: " & gvActas.DataKeys(contador)("UsuarioRegistra").ToString & Environment.NewLine &
+                                            "Fecha Registra: " & gvActas.DataKeys(contador)("FechaRegistro").ToString & Environment.NewLine & "Usuario Modifica: " &
+                                            gvActas.DataKeys(contador)("UsuarioModifica").ToString & Environment.NewLine & "Fecha Modifica: " &
+                                            gvActas.DataKeys(contador)("FechaModifica").ToString
+                    contador = contador + 1
+                Next
+            End If
+
+        Else
+            Funciones.ModalNotificacion("MS_00")
+            LblTituloActas.Visible = False
+        End If
+    End Sub
+
+    Private Sub gvActas_RowCommand(sender As Object, e As GridViewCommandEventArgs) Handles gvActas.RowCommand
+        Dim rowIndex As Integer
+        Dim id As String = ""
+        If IsNumeric(e.CommandArgument) Then
+            rowIndex = Convert.ToInt32(e.CommandArgument)
+            If (e.CommandName = "SelectEdit") Then
+                'hdIdActa.Text = grvActas.DataKeys(rowIndex)("IdActa").ToString()
+                'hdIdContrato.Text = grvActas.DataKeys(rowIndex)("IdContrato").ToString()
+                'ddlTipoActa_Registro.SelectedValue = grvActas.DataKeys(rowIndex)("TipoActa").ToString()
+                'txtNumeroActa.Text = grvActas.DataKeys(rowIndex)("NumeroActa").ToString()
+                'txtFechaRecepcion.Text = grvActas.DataKeys(rowIndex)("FechaRecepcion").ToString()
+                'txtPorcentajeRecibido.Text = grvActas.DataKeys(rowIndex)("Porcentaje").ToString()
+                'txtMonto.Text = grvActas.DataKeys(rowIndex)("Monto").ToString()
+                'txtObservacion.Text = grvActas.DataKeys(rowIndex)("Observacion").ToString()
+
+                'Dim adjunto As String = ""
+                'If Session("activoDW") = "S" Then
+                '    adjunto = ConsultarArchivoDocuware(hdIdContrato.Text, txtContrato_TabActa.Text, grvActas.DataKeys(rowIndex)("IdActa").ToString())
+
+                '    If adjunto <> "sinAdjunto" Then
+                '        If adjunto <> "errorAdjunto" Then
+
+                '            flUpldAdjunto.Enabled = False
+                '            pnlAdjUPloader.Visible = False
+                '            pnlAdjDWloader.Visible = True
+
+                '            Dim campos As String() = adjunto.Split("/")
+                '            Dim nombreArchivo As String = campos(campos.Length - 1)
+
+                '            HyperLinkDocadjunto.Text = nombreArchivo
+                '            HyperLinkDocadjunto.NavigateUrl = adjunto
+
+                '        Else
+                '            flUpldAdjunto.Enabled = False
+                '            pnlAdjUPloader.Visible = False
+                '            pnlAdjDWloader.Visible = True
+
+                '            HyperLinkDocadjunto.Text = "Error al cargar archivo adjunto, intente otra vez."
+                '            Dim pageActual As String = HttpContext.Current.Request.Url.ToString()
+                '            HyperLinkDocadjunto.NavigateUrl = pageActual
+                '        End If
+                '    Else
+                '        flUpldAdjunto.Enabled = True
+                '        pnlAdjUPloader.Visible = True
+                '        pnlAdjDWloader.Visible = False
+                '    End If
+
+                'Else
+                '    flUpldAdjunto.Enabled = False
+                '    pnlAdjUPloader.Visible = False
+                '    pnlAdjDWloader.Visible = True
+
+                '    HyperLinkDocadjunto.Text = "El servicio para el manejo de archivos adjuntos no se encuentra disponible."
+                '    'Dim pageActual As String = HttpContext.Current.Request.Url.ToString()
+                '    'HyperLinkDocadjunto.NavigateUrl = pageActual
+                'End If
+
+
+                'MostrarFormularioRegistroActa()
+                'CambiarEtiquetaBotonGuardar(btnGuardar, "Actualizar")
+                ''ElseIf (e.CommandName = "SelectEliminar") Then
+                ''    id = grvActas.DataKeys(rowIndex)("IdActa").ToString()
+                ''    Funciones.ModalConfirmCodeBehind("¿Desea eliminar este registro?", False, id, "eliminaActa")
+            ElseIf (e.CommandName = "SelectAdju") Then
+
+                If Session("activoDW") = "S" Then
+                    Dim ruta As String = ""
+                    ruta = ConsultarRutaAdjuntoActa(TxtIdContrato.Text, txtNumConM.Text, gvActas.DataKeys(rowIndex)("IdActa").ToString())
+                    If ruta <> "" Then
+                        CargarURL(ruta)
+                    Else
+                        Funciones.ModalNotificacion("ADJ1")
+                    End If
+                Else
+                    Funciones.ModalNotificacion("ADJ2")
+                End If
+
+
+            End If
+
+        End If
+    End Sub
+
+    Private Function ConsultarRutaAdjuntoActa(ByVal idContrato As String, ByVal numContrato As String, ByVal idActa As String) As String
+        Dim adjunto As String = ""
+        Dim nombreArchivo As String = ""
+        Dim url As String = ""
+        adjunto = ConsultarArchivoDocuware(idContrato, numContrato, idActa)
+
+        If adjunto <> "sinAdjunto" Then
+            If adjunto <> "errorAdjunto" Then
+                url = adjunto
+            End If
+        End If
+        Return url
+    End Function
+
+    Private Function ConsultarArchivoDocuware(idContrato As String, numContrato As String, idActa As Integer)
+
+        Dim lsIdentificador As String = Funciones.GetUsuarioIdentificador
+
+        Dim stateArray As New ArrayList
+        Dim strRespuesta As String
+        Dim urlAdjunto As String = ""
+
+        'Dim parametros As String = "IDACTA"
+        'Dim parametros As String = "IDCONTRATO|IDACTA|NUMCONTRATO"
+
+        'Dim valores As String = String.Format("{0}", idActa)
+        'Dim valores As String = String.Format("{0}|{1}|{2}", idContrato, idActa, numContrato)
+
+        Dim parametros As String = "IDCONTRATO|IDACTA"
+        Dim valores As String = String.Format("{0}|{1}", idContrato, idActa)
+
+
+        ' columnas que regresa
+        Dim indices As String = "IDCONTRATO|NUMCONTRATO|IDACTA|NUMEROACTA|TIPOACTA|USUARIOADJUNTA|FECHA_ADJUNTO|SUBSERV"
+
+        Dim appSettings = ConfigurationManager.AppSettings
+        Dim strInstitucion As String = appSettings.Get("INSTITUCION")
+        Dim strOperacion As String = appSettings.Get("OPERQUERY")
+        'Dim usuarioDW As String = appSettings.Get("USUARIODWLOAD")
+        Dim usuarioDW As String = appSettings.Get("USUARIOUPLOAD")
+
+        Try
+            Dim dwInt As dwIntegrador.IdwIntegratorClient = New dwIntegrador.IdwIntegratorClient()
+            strRespuesta = dwInt.enviarOperacionDW("EXTERNA", strInstitucion, usuarioDW, strOperacion, parametros, valores, indices, "")
+
+            If Not String.IsNullOrEmpty(strRespuesta) Then
+                If strRespuesta.Substring(0, 5) <> "ERROR" Then
+                    strRespuesta = strRespuesta.Remove(strRespuesta.Length - 1, 1)
+                    strRespuesta = strRespuesta.Remove(strRespuesta.Length - 1, 1)
+                    Dim campos As String() = strRespuesta.Split("|")
+                    Dim idDOc As String() = campos(0).Split("=")
+                    Dim link As String = CrearLink(idDOc(1))
+                    Dim idActaStr As String() = campos(3).Split("=")
+                    'Dim link As String = CrearLink(idActaStr(1))
+
+                    hd_DWDocID.Text = idDOc(1) 'Variable Oculta para almacenar el DWDOCID que identifica el documento adjunto en DocuWare
+
+                    If link.Substring(0, 5) <> "ERROR" Then
+                        urlAdjunto = link
+                    Else
+                        urlAdjunto = "errorAdjunto"
+                    End If
+
+                Else
+                    urlAdjunto = "errorAdjunto"
+                    hd_DWDocID.Text = ""
+                End If
+            Else
+                Dim dt As DataTable
+                dt = IntTC.ActualizarActa_DocumentoAdjunto(idActa, "N", lsIdentificador) 'Se valida docu,ento, sino existe se actualiza db 
+                hd_DWDocID.Text = ""
+                urlAdjunto = "sinAdjunto"
+            End If
+        Catch ex As Exception
+            IntTC.RegistrarError(lsIdentificador, "ConsultarArchivoDocuware", ex.Message, ex.StackTrace)
+        End Try
+
+
+        Return urlAdjunto
+
+    End Function
+
+#End Region
+
+End Class
